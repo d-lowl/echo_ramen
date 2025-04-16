@@ -1,16 +1,24 @@
 import Phaser from 'phaser';
 import config from './config';
-import MainScene from './scenes/MainScene';
+import SceneManager from './managers/SceneManager';
+import MainMenuScene from './scenes/MainMenuScene';
+import GameScene from './scenes/GameScene';
+import ResultScene from './scenes/ResultScene';
 
 class Game extends Phaser.Game {
     constructor() {
         super(config);
         
-        // Register scenes
-        this.scene.add('MainScene', MainScene);
+        // Initialize scene manager
+        this.sceneManager = new SceneManager(this);
         
-        // Start with the main scene
-        this.scene.start('MainScene');
+        // Register all scenes
+        this.sceneManager.register('MainMenuScene', MainMenuScene);
+        this.sceneManager.register('GameScene', GameScene);
+        this.sceneManager.register('ResultScene', ResultScene);
+        
+        // Start with the main menu scene
+        this.sceneManager.start('MainMenuScene');
     }
 }
 

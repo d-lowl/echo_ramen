@@ -16,7 +16,9 @@ const config = {
         }
     },
     pixelArt: false,
-    roundPixels: true
+    roundPixels: true,
+    // We'll let the SceneManager handle scene registration
+    scene: []
 };
 
 export default config; 
