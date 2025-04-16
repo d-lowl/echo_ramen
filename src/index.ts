@@ -6,6 +6,8 @@ import GameScene from './scenes/GameScene';
 import ResultScene from './scenes/ResultScene';
 
 class Game extends Phaser.Game {
+    sceneManager: SceneManager;
+    
     constructor() {
         super(config);
         

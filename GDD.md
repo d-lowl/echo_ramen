@@ -92,7 +92,6 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
 
 ### Fridge Management
 - Limited space for ingredients in holographic storage
-- Ingredient freshness system with preservation tech
 - Special events that affect available ingredients (supply chain issues, black market opportunities)
 - Upgrade system for fridge capacity and draw limits
 - Cybernetic enhancements for kitchen efficiency
@@ -117,6 +116,24 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
 ### Core Mechanics
 - Token drawing system
 - Attribute calculation engine
+  - **Data Structure**
+    - Attribute class tracking name, value, min (-10) and max (10) bounds
+    - RecipeAttributes class containing the three main attributes (Richness, Spiciness, Sweetness)
+    - Ingredient class with name, attribute effects, and optional special effect
+  - **Calculation Rules**
+    - Adding ingredients adds their attribute effects to recipe attributes
+    - Removing ingredients subtracts their attribute effects from recipe
+    - Attribute values constrained between -10 and 10
+    - Positive values represent Richness, Spiciness, or Sweetness
+    - Negative values represent Lightness, Mildness, or Savory
+  - **Attribute Comparison**
+    - Match percentage calculation: 100 - (sum of absolute differences / maximum possible difference) * 100
+    - Perfect match (100%) when all attributes exactly match customer request
+    - Minimum acceptable match: 70%
+  - **Special Effects Implementation**
+    - Amplify: Doubles one attribute effect from the next ingredient
+    - Balance: Brings one attribute closer to neutral (0)
+    - Neutralize: Cancels negative effects from the next ingredient
 - Special effect processor
 - Score calculator
 - Save/load system
@@ -136,62 +153,3 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
   - Customer reactions (varied cyberpunk character voices)
   - Success/failure feedback (neon UI sounds)
 
-## Development Phases
-
-### Phase 1: Core Mechanics
-- Basic ingredient system
-- Attribute balancing
-- Simple customer requests
-- Basic UI with cyberpunk elements
-
-### Phase 2: Content
-- Additional ingredients with cyberpunk themes
-- Special effects with technological descriptions
-- More customer types with diverse cyberpunk backgrounds
-- Basic progression system
-
-### Phase 3: Polish
-- Visual improvements with neon aesthetics
-- Audio implementation with synthwave tracks
-- Tutorial system with AI guide
-- Balance adjustments
-
-### Phase 4: Release
-- Bug fixes
-- Performance optimization
-- Final balancing
-- Platform deployment
-
-## Future Improvements
-
-### Content Expansion
-- Additional customer types with unique preferences
-- More ingredients with diverse effects
-- Special events and challenges
-- Story elements and character backgrounds
-
-### Gameplay Enhancements
-- Advanced special effects system
-- Time pressure mechanics
-- Multiple customer requests at once
-- Competitive mode against AI or other players
-
-### Progression System
-- Full cryptocurrency economy
-- Kitchen upgrades and cybernetic enhancements
-- Ingredient freshness and preservation system
-- Reputation system affecting customer types
-
-### Visual and Audio Polish
-- Advanced holographic UI effects
-- Character animations and expressions
-- Environmental effects (rain, neon signs)
-- Full soundtrack with multiple tracks
-- Voice acting for customers
-
-### Technical Improvements
-- Save/load system
-- Settings menu
-- Performance optimizations
-- Mobile platform support
-- Accessibility features 

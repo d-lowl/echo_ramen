@@ -1,9 +1,36 @@
+import Phaser from 'phaser';
+
+interface ButtonStyle {
+    fontSize?: string;
+    fontFamily?: string;
+    color?: string;
+    backgroundColor?: string;
+    padding?: {
+        x: number;
+        y: number;
+    };
+    stroke?: string;
+    strokeThickness?: number;
+    shadow?: {
+        offsetX: number;
+        offsetY: number;
+        color: string;
+        blur: number;
+        stroke: boolean;
+        fill: boolean;
+    };
+}
+
 export default class Button {
-    constructor(scene, x, y, text, onClick, style = {}) {
+    private scene: Phaser.Scene;
+    private text: Phaser.GameObjects.Text;
+    private bg: Phaser.GameObjects.Rectangle;
+
+    constructor(scene: Phaser.Scene, x: number, y: number, text: string, onClick?: () => void, style: ButtonStyle = {}) {
         this.scene = scene;
         
         // Default style with cyberpunk theme
-        const defaultStyle = {
+        const defaultStyle: ButtonStyle = {
             fontSize: '24px',
             fontFamily: 'Arial',
             color: '#00ffff',
@@ -69,13 +96,13 @@ export default class Button {
         });
     }
     
-    setVisible(visible) {
+    setVisible(visible: boolean): this {
         this.text.setVisible(visible);
         this.bg.setVisible(visible);
         return this;
     }
     
-    destroy() {
+    destroy(): void {
         this.text.destroy();
         this.bg.destroy();
     }

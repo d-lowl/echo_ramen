@@ -1,15 +1,28 @@
+import Phaser from 'phaser';
 import Button from '../components/Button';
 
+interface TextStyle {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+    stroke?: string;
+    strokeThickness?: number;
+    fill?: string;
+}
+
 export default class MainScene extends Phaser.Scene {
+    private startButton: Button;
+    private settingsButton: Button;
+
     constructor() {
         super('MainScene');
     }
 
-    preload() {
+    preload(): void {
         // Here we'll load assets when we have them
     }
 
-    create() {
+    create(): void {
         // Set up cyberpunk style background
         this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0a0a1e).setOrigin(0);
         
@@ -24,7 +37,7 @@ export default class MainScene extends Phaser.Scene {
                 color: '#00ffff',
                 stroke: '#ff00ff',
                 strokeThickness: 2
-            }
+            } as TextStyle
         ).setOrigin(0.5);
 
         // Add simple animation to text
@@ -62,10 +75,10 @@ export default class MainScene extends Phaser.Scene {
         );
 
         // Debugging info
-        this.add.text(10, 10, 'Phaser v' + Phaser.VERSION, { fontSize: '16px', fill: '#00ff00' });
+        this.add.text(10, 10, 'Phaser v' + Phaser.VERSION, { fontSize: '16px', fill: '#00ff00' } as TextStyle);
     }
 
-    update() {
+    update(): void {
         // Game logic will go here
     }
 } 

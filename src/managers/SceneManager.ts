@@ -1,8 +1,17 @@
+import Phaser from 'phaser';
+
+// The SceneConstructor type needs to be the class type, not instance type
+type SceneConstructor = typeof Phaser.Scene;
+
 /**
  * SceneManager - Handles scene transitions and data passing
  */
 export default class SceneManager {
-    constructor(game) {
+    private game: Phaser.Game;
+    private scenes: Record<string, SceneConstructor>;
+    private currentScene: string | null;
+
+    constructor(game: Phaser.Game) {
         this.game = game;
         this.scenes = {};
         this.currentScene = null;
@@ -11,9 +20,9 @@ export default class SceneManager {
     /**
      * Register a scene with the manager
      * @param {string} key - The scene key
-     * @param {Phaser.Scene} sceneClass - The scene class
+     * @param {SceneConstructor} sceneClass - The scene class
      */
-    register(key, sceneClass) {
+    register(key: string, sceneClass: SceneConstructor): void {
         this.scenes[key] = sceneClass;
         this.game.scene.add(key, sceneClass);
     }
@@ -23,7 +32,7 @@ export default class SceneManager {
      * @param {string} key - The scene key to start
      * @param {object} data - Optional data to pass to the scene
      */
-    start(key, data = {}) {
+    start(key: string, data: object = {}): void {
         if (!this.scenes[key]) {
             console.error(`Scene ${key} not registered with SceneManager`);
             return;
@@ -45,7 +54,7 @@ export default class SceneManager {
      * @param {object} data - Optional data to pass to the scene
      * @param {number} duration - Transition duration in milliseconds
      */
-    transition(key, data = {}, duration = 500) {
+    transition(key: string, data: object = {}, duration: number = 500): void {
         if (!this.scenes[key]) {
             console.error(`Scene ${key} not registered with SceneManager`);
             return;

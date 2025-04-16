@@ -1,22 +1,40 @@
+import Phaser from 'phaser';
 import Button from '../components/Button';
 
+interface GameData {
+    difficulty?: string;
+}
+
+interface TextStyle {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+    fill?: string;
+}
+
 export default class GameScene extends Phaser.Scene {
+    private score: number;
+    private difficulty: string;
+    private scoreText: Phaser.GameObjects.Text;
+    private pauseButton: Button;
+    private endGameButton: Button;
+    
     constructor() {
         super('GameScene');
         this.score = 0;
     }
 
-    init(data) {
+    init(data: GameData): void {
         // Initialize with any passed data
         this.difficulty = data.difficulty || 'normal';
         this.score = 0;
     }
 
-    preload() {
+    preload(): void {
         // Load game assets
     }
 
-    create() {
+    create(): void {
         // Set background
         this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0a0a1e).setOrigin(0);
         
@@ -25,7 +43,7 @@ export default class GameScene extends Phaser.Scene {
             20, 
             20, 
             'SCORE: 0', 
-            { fontFamily: 'Arial', fontSize: '24px', color: '#00ffff' }
+            { fontFamily: 'Arial', fontSize: '24px', color: '#00ffff' } as TextStyle
         );
         
         // Add placeholder for game elements
@@ -33,7 +51,7 @@ export default class GameScene extends Phaser.Scene {
             this.cameras.main.centerX,
             this.cameras.main.centerY,
             'GAME SCENE PLACEHOLDER',
-            { fontFamily: 'Arial', fontSize: '32px', color: '#ffffff' }
+            { fontFamily: 'Arial', fontSize: '32px', color: '#ffffff' } as TextStyle
         ).setOrigin(0.5);
         
         // Add pause button in top right
@@ -62,7 +80,7 @@ export default class GameScene extends Phaser.Scene {
         );
     }
 
-    update() {
+    update(): void {
         // Game logic will be implemented here
         
         // For demo, increment score randomly
