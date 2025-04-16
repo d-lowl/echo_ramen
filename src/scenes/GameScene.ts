@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import Button from '../components/Button';
+import Request from '../attributes/Request';
 
 interface GameData {
     difficulty?: string;
@@ -18,6 +19,8 @@ export default class GameScene extends Phaser.Scene {
     private scoreText: Phaser.GameObjects.Text;
     private pauseButton: Button;
     private endGameButton: Button;
+    private customerRequest: Request;
+    private requestText: Phaser.GameObjects.Text;
     
     constructor() {
         super('GameScene');
@@ -28,6 +31,9 @@ export default class GameScene extends Phaser.Scene {
         // Initialize with any passed data
         this.difficulty = data.difficulty || 'normal';
         this.score = 0;
+        
+        // Generate a random customer request
+        this.generateRandomRequest();
     }
 
     preload(): void {
@@ -45,6 +51,9 @@ export default class GameScene extends Phaser.Scene {
             'SCORE: 0', 
             { fontFamily: 'Arial', fontSize: '24px', color: '#00ffff' } as TextStyle
         );
+        
+        // Display customer request
+        this.displayCustomerRequest();
         
         // Add placeholder for game elements
         this.add.text(
@@ -88,5 +97,33 @@ export default class GameScene extends Phaser.Scene {
             this.score += 10;
             this.scoreText.setText(`SCORE: ${this.score}`);
         }
+    }
+    
+    /**
+     * Generate a new random customer request
+     */
+    private generateRandomRequest(): void {
+        this.customerRequest = Request.createRandom();
+    }
+    
+    /**
+     * Display the current customer request on screen
+     */
+    private displayCustomerRequest(): void {
+        // Format the request text with attribute values
+        const requestString = `CUSTOMER REQUEST: \n${this.customerRequest.getDescription()}`;
+        
+        // Display the request text
+        this.requestText = this.add.text(
+            this.cameras.main.centerX,
+            100,
+            requestString,
+            { 
+                fontFamily: 'Arial', 
+                fontSize: '24px', 
+                color: '#ffcc00',
+                align: 'center'
+            } as TextStyle
+        ).setOrigin(0.5);
     }
 } 
