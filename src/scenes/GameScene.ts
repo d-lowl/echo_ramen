@@ -103,13 +103,19 @@ export default class GameScene extends Phaser.Scene {
      * Generate a new random customer request
      */
     private generateRandomRequest(): void {
-        this.customerRequest = Request.createRandom();
+        this.customerRequest = Request.createRandom(1);
     }
     
     /**
      * Display the current customer request on screen
      */
     private displayCustomerRequest(): void {
+        // Log the raw request values for debugging
+        console.log('Customer Request Values:', {
+            richness: this.customerRequest.attributes.richness,
+            spiciness: this.customerRequest.attributes.spiciness, 
+            sweetness: this.customerRequest.attributes.sweetness
+        });
         // Format the request text with attribute values
         const requestString = `CUSTOMER REQUEST: \n${this.customerRequest.getDescription()}`;
         

@@ -1,5 +1,5 @@
-import Effect, { SpecialEffect } from "./Effects";
-import Recipe from "./Recipe";
+import Effect, { SpecialEffect } from "../attributes/Effects";
+import Recipe from "../attributes/Recipe";
 
 class Ingredient {
     private name: string;

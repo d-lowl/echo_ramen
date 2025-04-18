@@ -153,3 +153,57 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
   - Customer reactions (varied cyberpunk character voices)
   - Success/failure feedback (neon UI sounds)
 
+## Ingredients
+
+Attribute triad:
+- Richness
+- Spiciness
+- Sweetness
+
+Attribute anti-triad:
+- Lightness
+- Mildness
+- Savory
+
+### Basic Ingredients
+
+Basic ingredients structure:
+- Name
+- Effects:
+    - Attribute +2
+    - Next in triad -1
+
+```yaml
+- Name: Synthetic Miso
+  Effects:
+    - Richness +2
+    - Sweetness -1 (i.e. Savoryness +1)
+
+- Name: Nano-Chili Oil
+  Effects:
+    - Spiciness +2
+    - Richness -1 (i.e. Lightness +1)
+
+- Name: Bio-Engineered Green Onions
+  Effects:
+    - Sweetness +2
+    - Spiciness -1 (i.e. Mildness +1)
+
+- Name: Quantum Lightness Broth
+  Effects:
+    - Richness -2 (i.e. Lightness +2)
+    - Sweetness +1
+
+- Name: Cryo-Mildness Extract
+  Effects:
+    - Spiciness -2 (i.e. Mildness +2)
+    - Richness +1
+
+- Name: Synthetic Savory Umami
+  Effects:
+    - Sweetness -2 (i.e. Savoryness +2)
+    - Spiciness +1
+```
+
+
+

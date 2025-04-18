@@ -1,5 +1,5 @@
 import Attribute from "./Attribute";
-import Ingredient from "./Ingredient";
+import Ingredient from "../ingredients/Ingredient";
 import { SpecialEffect } from "./Effects";
 
 class Recipe {

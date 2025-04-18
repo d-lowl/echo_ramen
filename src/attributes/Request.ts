@@ -21,31 +21,20 @@ class Request {
 
     /**
      * Create a new random request with random attribute values
-     * @returns A new request with random attributes
+     * @param difficulty Level 1-3 determining how many attributes are set
+     * @returns A new request with random attributes based on difficulty
      */
-    static createRandom(): Request {
-        const attributes = {
-            "richness": new Attribute("Richness", Math.floor(Math.random() * 21) - 10, -10, 10),
-            "spiciness": new Attribute("Spiciness", Math.floor(Math.random() * 21) - 10, -10, 10),
-            "sweetness": new Attribute("Sweetness", Math.floor(Math.random() * 21) - 10, -10, 10),
-        };
-        
-        return new Request(attributes);
-    }
-    
-    /**
-     * Create a request with specific attribute values
-     * @param richness Richness value (-10 to 10)
-     * @param spiciness Spiciness value (-10 to 10)
-     * @param sweetness Sweetness value (-10 to 10)
-     * @returns A new request with the specified attributes
-     */
-    static create(richness: number, spiciness: number, sweetness: number): Request {
-        const attributes = {
-            "richness": new Attribute("Richness", richness, -10, 10),
-            "spiciness": new Attribute("Spiciness", spiciness, -10, 10),
-            "sweetness": new Attribute("Sweetness", sweetness, -10, 10),
-        };
+    static createRandom(difficulty: number = 1): Request {
+        // Get random attribute names to set based on difficulty
+        const attributeNames = ["Richness", "Spiciness", "Sweetness"];
+        const shuffled = attributeNames.sort(() => 0.5 - Math.random());
+        const toSet = shuffled.slice(0, Math.min(difficulty, 3));
+
+        // Set random values for selected attributes
+        const attributes = {}
+        toSet.forEach(attr => {
+            attributes[attr] = new Attribute(attr, Math.floor(Math.random() * 21) - 10, -10, 10);
+        });
         
         return new Request(attributes);
     }
@@ -84,20 +73,7 @@ class Request {
             details: details
         };
     }
-    
-    /**
-     * Get a serialized representation of the request attributes
-     * @returns Simple object with attribute values
-     */
-    serialize(): { [key: string]: number } {
-        const result: { [key: string]: number } = {};
-        
-        Object.keys(this.attributes).forEach(key => {
-            result[key] = this.attributes[key].value;
-        });
-        
-        return result;
-    }
+
     
     /**
      * Get a description of the request using display names
@@ -109,12 +85,12 @@ class Request {
         Object.keys(this.attributes).forEach(key => {
             const attr = this.attributes[key];
             const value = Math.abs(attr.value);
-            let intensity = "medium";
+            let intensity = "Medium";
             
             if (value <= 3) {
-                intensity = "slight";
+                intensity = "Slight";
             } else if (value >= 7) {
-                intensity = "very";
+                intensity = "Great";
             }
             
             descriptions.push(`${intensity} ${attr.getDisplayName()}`);

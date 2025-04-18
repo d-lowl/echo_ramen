@@ -1,4 +1,4 @@
-import Ingredient from '../Ingredient';
+import Ingredient from '../../ingredients/Ingredient';
 import { BasicEffect, AmplifyEffect, SpecialEffect } from '../Effects';
 import Recipe from '../Recipe';
 

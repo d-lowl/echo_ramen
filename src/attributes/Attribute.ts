@@ -33,7 +33,7 @@ class Attribute {
         switch (this.name) {
             case 'Richness': return 'Lightness';
             case 'Spiciness': return 'Mildness';
-            case 'Sweetness': return 'Savory';
+            case 'Sweetness': return 'Savoryness';
             default: return `Not ${this.name}`;
         }
     }

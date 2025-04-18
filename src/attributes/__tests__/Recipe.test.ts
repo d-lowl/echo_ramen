@@ -1,5 +1,5 @@
 import Recipe from '../Recipe';
-import Ingredient from '../Ingredient';
+import Ingredient from '../../ingredients/Ingredient';
 import { BasicEffect, AmplifyEffect, BalanceEffect, NeutralizeEffect, SpecialEffect } from '../Effects';
 
 describe('Recipe', () => {
