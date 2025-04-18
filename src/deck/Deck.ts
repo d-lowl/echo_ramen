@@ -1,24 +1,45 @@
-import Ingredient from "src/ingredients/Ingredient";
+import Ingredient from "../ingredients/Ingredient";
 
 export default class Deck {
     deck: Ingredient[];
     discard: Ingredient[];
     constructor(public ingredients: Ingredient[]) {
-        this.deck = ingredients.sort(() => Math.random() - 0.5);
+        // Ensure ingredients array is valid
+        if (!ingredients || !Array.isArray(ingredients)) {
+            console.error("Invalid ingredients provided to Deck constructor");
+            this.deck = [];
+            this.discard = [];
+            return;
+        }
+        
+        // Filter out any undefined ingredients
+        this.deck = ingredients
+            .filter(ingredient => ingredient !== undefined)
+            .sort(() => Math.random() - 0.5);
         this.discard = [];
     }
 
     draw(): Ingredient {
+        // Check if deck is empty and needs to be reshuffled
         if (this.deck.length === 0) {
-            this.deck = this.discard;
+            if (this.discard.length === 0) {
+                console.warn("Both deck and discard pile are empty!");
+                return null;
+            }
+            
+            this.deck = this.discard
+                .filter(ingredient => ingredient !== undefined);
             this.discard = [];
             this.deck.sort(() => Math.random() - 0.5);
         }
-        return this.deck.pop();
+        
+        return this.deck.pop() || null;
     }
 
     returnCard(ingredient: Ingredient) {
-        this.discard.push(ingredient);
+        if (ingredient) {
+            this.discard.push(ingredient);
+        }
     }
 }
 

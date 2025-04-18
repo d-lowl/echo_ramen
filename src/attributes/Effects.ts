@@ -25,7 +25,7 @@ export class BasicEffect implements Effect {
     constructor(public attribute: string, public value: number) {}
 
     apply(recipe: Recipe) {
-        recipe.attributes[this.attribute].addValue(recipe.applySpecialEffects(this.value));
+        recipe.attributes[this.attribute.toLowerCase()].addValue(recipe.applySpecialEffects(this.value));
     }
     
     /**

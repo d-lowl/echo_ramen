@@ -16,23 +16,51 @@ export default class Game {
         this.currentRecipe = new Recipe();
         this.generateNewRequest();
         this.hand = [];
+        
+        // Fill the hand with cards from the deck
+        this.drawNewHand();
+    }
+
+    /**
+     * Draw a new hand of cards
+     */
+    private drawNewHand(): void {
+        this.hand = [];
         for (let i = 0; i < this.handSize; i++) {
-            this.hand.push(this.deck.draw());
+            const card = this.deck.draw();
+            if (card) {
+                this.hand.push(card);
+            } else {
+                console.warn(`Failed to draw card ${i+1} of ${this.handSize}`);
+            }
         }
+        
+        // Log the hand size for debugging
+        console.log(`Hand contains ${this.hand.length} cards`);
     }
 
     public playIngredient(index: number) {
+        // Validate index
+        if (index < 0 || index >= this.hand.length) {
+            console.error(`Invalid index: ${index}, hand size: ${this.hand.length}`);
+            return;
+        }
+        
         const played = this.hand.splice(index, 1)[0];
+        
+        // Make sure we have a valid ingredient
+        if (!played) {
+            console.error(`No ingredient at index ${index}`);
+            return;
+        }
+        
         this.deck.returnCard(played);
         this.currentRecipe.addIngredient(played);
     }
 
     public finishTurn() {
         this.currentRecipe.resetAttributes();
-        this.hand = [];
-        for (let i = 0; i < this.handSize; i++) {
-            this.hand.push(this.deck.draw());
-        }
+        this.drawNewHand();
     }
     
     /**
@@ -109,7 +137,7 @@ export default class Game {
     /**
      * Draw a card from the deck
      */
-    drawCard(): any {
+    drawCard(): Ingredient {
         return this.deck.draw();
     }
     
@@ -118,5 +146,12 @@ export default class Game {
      */
     increaseDifficulty(): void {
         this.difficulty = Math.min(3, this.difficulty + 1);
+    }
+    
+    /**
+     * Get a copy of the current hand
+     */
+    getHand(): Ingredient[] {
+        return [...this.hand];
     }
 }
