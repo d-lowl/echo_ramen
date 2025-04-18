@@ -1,6 +1,8 @@
 import Recipe from '../Recipe';
 import Ingredient from '../../ingredients/Ingredient';
 import { BasicEffect, AmplifyEffect, BalanceEffect, NeutralizeEffect, SpecialEffect } from '../Effects';
+import Attribute from '../Attribute';
+import Request from '../Request';
 
 describe('Recipe', () => {
   // Constructor Tests
@@ -118,11 +120,11 @@ describe('Recipe', () => {
       recipe.attributes['spiciness'].setValue(3);
       recipe.attributes['sweetness'].setValue(-2);
       
-      const customerRequest = {
-        richness: 5,
-        spiciness: 3,
-        sweetness: -2
-      };
+      const customerRequest = new Request({
+        "Richness": new Attribute("Richness", 5, -10, 10),
+        "Spiciness": new Attribute("Spiciness", 3, -10, 10),
+        "Sweetness": new Attribute("Sweetness", -2, -10, 10)
+      });
       
       const result = recipe.compareWithRequest(customerRequest);
       expect(result.matchPercentage).toBe(100);
@@ -144,11 +146,11 @@ describe('Recipe', () => {
       recipe.attributes['spiciness'].setValue(3);
       recipe.attributes['sweetness'].setValue(-2);
       
-      const customerRequest = {
-        richness: 7,
-        spiciness: 3,
-        sweetness: 1
-      };
+      const customerRequest = new Request({
+        "Richness": new Attribute("Richness", 7, -10, 10),
+        "Spiciness": new Attribute("Spiciness", 3, -10, 10),
+        "Sweetness": new Attribute("Sweetness", 1, -10, 10)
+      });
       
       const result = recipe.compareWithRequest(customerRequest);
       
@@ -173,11 +175,11 @@ describe('Recipe', () => {
       recipe.attributes['spiciness'].setValue(10);
       recipe.attributes['sweetness'].setValue(10);
       
-      const customerRequest = {
-        richness: -10,
-        spiciness: -10,
-        sweetness: -10
-      };
+      const customerRequest = new Request({
+        "Richness": new Attribute("Richness", -10, -10, 10),
+        "Spiciness": new Attribute("Spiciness", -10, -10, 10),
+        "Sweetness": new Attribute("Sweetness", -10, -10, 10)
+      });
       
       const result = recipe.compareWithRequest(customerRequest);
       

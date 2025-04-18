@@ -145,7 +145,7 @@ describe('Attribute System Integration', () => {
       // sweetness: -2 (-1 + -1)
       
       // Compare recipe with request
-      const comparison = recipe.compareWithRequest(request.serialize());
+      const comparison = recipe.compareWithRequest(request);
       
       // Should be a perfect match
       expect(comparison.matchPercentage).toBe(100);
@@ -184,7 +184,7 @@ describe('Attribute System Integration', () => {
       // sweetness: -2 (-2) - Request was -3
       
       // Compare recipe with request
-      const comparison = recipe.compareWithRequest(request.serialize());
+      const comparison = recipe.compareWithRequest(request);
       
       // Not a perfect match, but close
       expect(comparison.matchPercentage).toBeLessThan(100);

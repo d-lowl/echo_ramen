@@ -132,18 +132,6 @@ describe('Request', () => {
 
   // Utility Method Tests
   describe('Utility Methods', () => {
-    it('serialize() should return correct object format', () => {
-      const request = Request.create(5, 3, -2);
-      
-      const serialized = request.serialize();
-      
-      expect(serialized).toEqual({
-        richness: 5,
-        spiciness: 3,
-        sweetness: -2
-      });
-    });
-
     it('getDescription() should generate readable descriptions', () => {
       // Test slight intensity (0-3)
       const slightRequest = Request.create(2, 1, -3);

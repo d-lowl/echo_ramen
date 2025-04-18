@@ -1,6 +1,7 @@
 import Attribute from "./Attribute";
 import Ingredient from "../ingredients/Ingredient";
 import { SpecialEffect } from "./Effects";
+import Request from "./Request";
 
 class Recipe {
     private ingredients: Ingredient[];
@@ -24,6 +25,7 @@ class Recipe {
     addIngredient(ingredient: Ingredient) {
         this.ingredients.push(ingredient);
         ingredient.applyEffects(this);
+        console.log(this.attributes);
     }
     
     /**
@@ -59,7 +61,7 @@ class Recipe {
      * @param customerRequest The customer's requested attribute values
      * @returns Object with match percentage and details
      */
-    compareWithRequest(customerRequest: { [key: string]: number }): { 
+    compareWithRequest(customerRequest: Request): { 
         matchPercentage: number, 
         details: { [key: string]: { diff: number, match: number } } 
     } {
@@ -68,10 +70,10 @@ class Recipe {
         const details: { [key: string]: { diff: number, match: number } } = {};
         
         // Calculate difference for each attribute
-        Object.keys(this.attributes).forEach(attr => {
-            const currentValue = this.attributes[attr].value;
-            const requestedValue = customerRequest[attr] || 0;
-            const diff = Math.abs(currentValue - requestedValue);
+        Object.keys(customerRequest.attributes).forEach(attr => {
+            const requestedValue = customerRequest.attributes[attr].value;
+            const currentValue = this.attributes[attr]?.value || 0;
+            const diff = Math.abs(requestedValue - currentValue);
             
             totalDifference += diff;
             details[attr] = {

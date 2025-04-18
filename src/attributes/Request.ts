@@ -38,6 +38,14 @@ class Request {
         
         return new Request(attributes);
     }
+
+    static create(richness: number, spiciness: number, sweetness: number): Request {
+        return new Request({
+            Richness: new Attribute("Richness", richness, -10, 10),
+            Spiciness: new Attribute("Spiciness", spiciness, -10, 10),
+            Sweetness: new Attribute("Sweetness", sweetness, -10, 10)
+        });
+    }
     
     /**
      * Compare this request with a recipe to determine match percentage

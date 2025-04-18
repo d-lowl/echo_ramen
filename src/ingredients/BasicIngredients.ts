@@ -1,4 +1,4 @@
-import { BasicEffect } from "src/attributes/Effects";
+import { BasicEffect } from "../attributes/Effects";
 import Ingredient from "./Ingredient";
 
 export const BasicIngredients: { [key: string]: Ingredient } = {
