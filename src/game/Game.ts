@@ -25,7 +25,9 @@ export default class Game {
      * Draw a new hand of cards
      */
     private drawNewHand(): void {
-        this.hand = [];
+        while (this.hand.length > 0) {
+            this.deck.returnCard(this.hand.pop());
+        }
         for (let i = 0; i < this.handSize; i++) {
             const card = this.deck.draw();
             if (card) {

@@ -21,6 +21,7 @@ export default class GameScene extends Phaser.Scene {
     private scoreText: Phaser.GameObjects.Text;
     private pauseButton: Button;
     private endGameButton: Button;
+    private viewDeckButton: Button;
     private requestText: Phaser.GameObjects.Text;
     private handContainer: Phaser.GameObjects.Container;
     private deckImage: Phaser.GameObjects.Rectangle;
@@ -130,6 +131,30 @@ export default class GameScene extends Phaser.Scene {
         border.setDepth(1);
         
         buttonContainer.add([borderGlow, border]);
+        
+        // Add "View Deck" button
+        this.viewDeckButton = new Button(
+            this,
+            this.cameras.main.width - 120,
+            80,
+            'VIEW DECK',
+            () => {
+                // Launch the ViewDeckScene
+                this.scene.launch('ViewDeckScene', { deck: this.gameLogic.deck });
+            },
+            {
+                fontSize: '20px',
+                width: 160,
+                height: 50,
+                bgColor: 0x222255,
+                hoverColor: 0x334499
+            }
+        );
+        
+        // Add button to scene
+        const viewDeckButtonObjects = this.viewDeckButton.getGameObjects();
+        this.add.existing(viewDeckButtonObjects[0]);
+        this.add.existing(viewDeckButtonObjects[1]);
     }
 
     update(): void {

@@ -4,6 +4,7 @@ import SceneManager from './managers/SceneManager';
 import MainMenuScene from './scenes/MainMenuScene';
 import GameScene from './scenes/GameScene';
 import ResultScene from './scenes/ResultScene';
+import ViewDeckScene from './scenes/ViewDeckScene';
 
 class Game extends Phaser.Game {
     sceneManager: SceneManager;
@@ -18,6 +19,7 @@ class Game extends Phaser.Game {
         this.sceneManager.register('MainMenuScene', MainMenuScene);
         this.sceneManager.register('GameScene', GameScene);
         this.sceneManager.register('ResultScene', ResultScene);
+        this.sceneManager.register('ViewDeckScene', ViewDeckScene);
         
         // Start with the main menu scene
         this.sceneManager.start('MainMenuScene');

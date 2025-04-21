@@ -31,6 +31,7 @@ export default class Deck {
                 .filter(ingredient => ingredient !== undefined);
             this.discard = [];
             this.deck.sort(() => Math.random() - 0.5);
+            console.log("Reshuffled deck");
         }
         
         return this.deck.pop() || null;
