@@ -19,6 +19,10 @@ interface ButtonStyle {
         stroke: boolean;
         fill: boolean;
     };
+    width?: number;
+    height?: number;
+    bgColor?: number;
+    hoverColor?: number;
 }
 
 export default class Button {
@@ -48,26 +52,54 @@ export default class Button {
                 blur: 3,
                 stroke: true,
                 fill: true
-            }
+            },
+            bgColor: 0x1a1a3a,
+            hoverColor: 0x3a3a5a
         };
         
         // Merge default and custom styles
         const buttonStyle = {...defaultStyle, ...style};
         
+        // Create text with basic styles first (without shadow effects that cause overflow)
+        const textStyle = {
+            fontFamily: buttonStyle.fontFamily,
+            fontSize: buttonStyle.fontSize,
+            color: buttonStyle.color,
+            stroke: buttonStyle.stroke,
+            strokeThickness: buttonStyle.strokeThickness
+        };
+        
         // Create button text
-        this.text = scene.add.text(x, y, text, buttonStyle)
+        this.text = scene.add.text(x, y, text, textStyle)
             .setOrigin(0.5)
-            .setPadding(buttonStyle.padding)
-            .setInteractive({ useHandCursor: true });
             
-        // Add background
+        // Calculate dimensions based on text and style
+        const width = buttonStyle.width || (this.text.width + buttonStyle.padding.x * 2);
+        const height = buttonStyle.height || (this.text.height + buttonStyle.padding.y * 2);
+        
+        // Add background with proper dimensions to contain the text
         this.bg = scene.add.rectangle(
             x, 
             y, 
-            this.text.width + buttonStyle.padding.x * 2, 
-            this.text.height + buttonStyle.padding.y * 2, 
-            0x1a1a3a
+            width + 10, // Add extra padding to accommodate glow effects
+            height + 10, 
+            buttonStyle.bgColor
         ).setOrigin(0.5).setStrokeStyle(2, 0xff00ff);
+        
+        // // After creating both elements, apply shadow to text if specified
+        // if (buttonStyle.shadow) {
+        //     this.text.setShadow(
+        //         buttonStyle.shadow.offsetX,
+        //         buttonStyle.shadow.offsetY,
+        //         buttonStyle.shadow.color,
+        //         buttonStyle.shadow.blur,
+        //         buttonStyle.shadow.stroke,
+        //         buttonStyle.shadow.fill
+        //     );
+        // }
+        
+        // Make text interactive after setting all properties
+        this.text.setInteractive({ useHandCursor: true });
         
         // Ensure text is on top
         this.bg.setDepth(1);
@@ -77,11 +109,17 @@ export default class Button {
         this.text.on('pointerover', () => {
             this.bg.setStrokeStyle(2, 0x00ffff);
             this.text.setStyle({ color: '#ffffff' });
+            if (buttonStyle.hoverColor) {
+                this.bg.setFillStyle(buttonStyle.hoverColor);
+            }
         });
         
         this.text.on('pointerout', () => {
             this.bg.setStrokeStyle(2, 0xff00ff);
             this.text.setStyle({ color: '#00ffff' });
+            if (buttonStyle.bgColor) {
+                this.bg.setFillStyle(buttonStyle.bgColor);
+            }
         });
         
         this.text.on('pointerdown', () => {
@@ -89,7 +127,11 @@ export default class Button {
         });
         
         this.text.on('pointerup', () => {
-            this.bg.setFillStyle(0x1a1a3a);
+            if (buttonStyle.bgColor) {
+                this.bg.setFillStyle(buttonStyle.bgColor);
+            } else {
+                this.bg.setFillStyle(0x1a1a3a);
+            }
             if (onClick) {
                 onClick();
             }
@@ -105,5 +147,9 @@ export default class Button {
     destroy(): void {
         this.text.destroy();
         this.bg.destroy();
+    }
+
+    getGameObjects(): (Phaser.GameObjects.Text | Phaser.GameObjects.Rectangle)[] {
+        return [this.bg, this.text];
     }
 } 

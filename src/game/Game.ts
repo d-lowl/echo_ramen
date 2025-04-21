@@ -154,4 +154,11 @@ export default class Game {
     getHand(): Ingredient[] {
         return [...this.hand];
     }
+    
+    /**
+     * Get the number of cards left in the deck
+     */
+    getDeckSize(): number {
+        return this.deck.getSize();
+    }
 }

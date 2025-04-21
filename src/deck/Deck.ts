@@ -41,5 +41,12 @@ export default class Deck {
             this.discard.push(ingredient);
         }
     }
+
+    /**
+     * Get the number of cards left in the deck
+     */
+    getSize(): number {
+        return this.deck.length;
+    }
 }
 

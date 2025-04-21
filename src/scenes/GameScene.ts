@@ -60,7 +60,7 @@ export default class GameScene extends Phaser.Scene {
             20, 
             20, 
             `SCORE: ${this.gameLogic.getScore()}`, 
-            { fontFamily: 'Arial', fontSize: '24px', color: '#00ffff' } as TextStyle
+            { fontFamily: 'Arial', fontSize: '32px', color: '#00ffff', stroke: '#000000', strokeThickness: 3 } as TextStyle
         );
         
         // Display customer request
@@ -69,45 +69,20 @@ export default class GameScene extends Phaser.Scene {
         // Create container for hand
         this.handContainer = this.add.container(0, 0);
         
-        // Display the deck
-        this.createDeckVisual();
-        
         // Display the recipe area
         this.createRecipeArea();
         
         // Display player's hand
         this.displayHand();
         
-        // Add pause button in top right
-        this.pauseButton = new Button(
-            this,
-            this.cameras.main.width - 100,
-            30,
-            'PAUSE',
-            () => {
-                // Pause game logic
-                console.log('Game paused');
-            },
-            { fontSize: '18px' }
-        );
-        
-        // Add end game button (for testing)
-        this.endGameButton = new Button(
-            this,
-            this.cameras.main.width - 100,
-            this.cameras.main.height - 50,
-            'END GAME',
-            () => {
-                // Go to results scene with current score
-                this.scene.start('ResultScene', { score: this.gameLogic.getScore() });
-            }
-        );
+        // Create button container for game control buttons
+        const buttonContainer = this.add.container(this.cameras.main.width - 200, this.cameras.main.height - 300);
         
         // Add complete order button
-        new Button(
+        const completeOrderButton = new Button(
             this,
-            this.cameras.main.width - 250,
-            this.cameras.main.height - 50,
+            0,
+            0,
             'COMPLETE ORDER',
             () => {
                 const scoreEarned = this.gameLogic.completeOrder();
@@ -117,16 +92,49 @@ export default class GameScene extends Phaser.Scene {
                 this.updateRecipeDisplay();
                 this.gameLogic.finishTurn();
                 this.displayHand();
+            },
+            { 
+                fontSize: '28px', 
+                width: 320, 
+                height: 80, 
+                bgColor: 0x222255, 
+                hoverColor: 0x334499,
+                stroke: '#ff00ff',
+                strokeThickness: 2,
+                shadow: {
+                    offsetX: 3,
+                    offsetY: 3,
+                    color: '#000000',
+                    blur: 5,
+                    stroke: true,
+                    fill: true
+                }
             }
         );
+        
+        // Add both the background rectangle and text from the button to the container
+        buttonContainer.add(completeOrderButton.getGameObjects());
+        
+        // Add a decorative neon border around the button
+        const borderWidth = 360;
+        const borderHeight = 120;
+        const border = this.add.rectangle(0, 0, borderWidth, borderHeight, 0x000000, 0)
+            .setStrokeStyle(2, 0xff00ff)
+            .setOrigin(0.5);
+            
+        // Add border glow effect
+        const borderGlow = this.add.rectangle(0, 0, borderWidth, borderHeight, 0xff00ff, 0.1)
+            .setOrigin(0.5)
+            .setBlendMode(Phaser.BlendModes.ADD);
+            
+        // Place the border and glow behind the button
+        borderGlow.setDepth(0);
+        border.setDepth(1);
+        
+        buttonContainer.add([borderGlow, border]);
     }
 
     update(): void {
-        // For demo only - will be removed in actual implementation
-        if (Math.random() < 0.01) {
-            this.gameLogic.addScore(10);
-            this.updateScore();
-        }
     }
     
     /**
@@ -146,7 +154,7 @@ export default class GameScene extends Phaser.Scene {
         console.log('Customer Request Values:', request.attributes);
         
         // Format the request text with attribute values
-        const requestString = `CUSTOMER REQUEST: \n${request.getDescription()}`;
+        const requestString = `CUSTOMER REQUEST:\n${request.getDescription()}`;
         
         // Update or create the request text
         if (this.requestText) {
@@ -158,30 +166,15 @@ export default class GameScene extends Phaser.Scene {
                 requestString,
                 { 
                     fontFamily: 'Arial', 
-                    fontSize: '24px', 
+                    fontSize: '28px', 
                     color: '#ffcc00',
-                    align: 'center'
+                    align: 'center',
+                    stroke: '#000000',
+                    strokeThickness: 2,
+                    shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 2, stroke: true, fill: true }
                 } as TextStyle
             ).setOrigin(0.5);
         }
-    }
-    
-    /**
-     * Create a visual representation of the deck
-     */
-    private createDeckVisual(): void {
-        // Create a deck visual in the top left corner
-        const deckX = 80;
-        const deckY = 120;
-        
-        this.deckImage = this.add.rectangle(deckX, deckY, 100, 140, 0x333399).setStrokeStyle(2, 0xffffff);
-        
-        this.deckText = this.add.text(
-            deckX, 
-            deckY, 
-            'DECK', 
-            { fontFamily: 'Arial', fontSize: '18px', color: '#ffffff' } as TextStyle
-        ).setOrigin(0.5);
     }
     
     /**
@@ -189,25 +182,42 @@ export default class GameScene extends Phaser.Scene {
      */
     private createRecipeArea(): void {
         // Create a recipe area on the right side
-        const recipeX = this.cameras.main.width - 200;
-        const recipeY = 240;
+        const recipeX = this.cameras.main.width - 600;
+        const recipeY = 280;
+        const recipeWidth = 300;
+        const recipeHeight = 150;
         
         this.recipeContainer = this.add.container(recipeX, recipeY);
         
-        const recipeBg = this.add.rectangle(0, 0, 300, 200, 0x222244).setStrokeStyle(2, 0xcccccc);
+        const recipeBg = this.add.rectangle(0, 0, recipeWidth, recipeHeight, 0x222244)
+            .setStrokeStyle(3, 0x00ffff)
+            .setAlpha(0.9);
+            
         this.recipeText = this.add.text(
             0, 
-            -80, 
+            -100, 
             'CURRENT RECIPE', 
-            { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' } as TextStyle
+            { 
+                fontFamily: 'Arial', 
+                fontSize: '24px', 
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 1
+            } as TextStyle
         ).setOrigin(0.5);
         
         this.recipeIngredients = this.add.text(
             0, 
-            0, 
+            -60, 
             'No ingredients added yet', 
-            { fontFamily: 'Arial', fontSize: '16px', color: '#cccccc', align: 'center', wordWrap: { width: 280 } } as TextStyle
-        ).setOrigin(0.5);
+            { 
+                fontFamily: 'Arial', 
+                fontSize: '16px', 
+                color: '#cccccc', 
+                align: 'center',
+                wordWrap: { width: 280 }
+            } as TextStyle
+        ).setOrigin(0.5, 0); // Changed to align to top by setting y origin to 0
         
         this.recipeContainer.add([recipeBg, this.recipeText, this.recipeIngredients]);
     }
@@ -228,11 +238,22 @@ export default class GameScene extends Phaser.Scene {
             return;
         }
         
-        // Position variables
-        const startX = 140;
-        const endX = this.cameras.main.width - 140;
-        const cardSpacing = (endX - startX) / Math.max(8, hand.length - 1);
-        const y = this.cameras.main.height - 100;
+        // Position variables - improved layout
+        const cardWidth = 140;
+        const margin = 20;
+        const totalWidth = this.cameras.main.width - (margin * 2);
+        const maxCards = 7; // Maximum number of fully visible cards
+        const y = this.cameras.main.height - 120;
+        
+        // Calculate spacing based on number of cards
+        let cardSpacing;
+        if (hand.length <= maxCards) {
+            // If we have fewer cards than max, space them evenly
+            cardSpacing = Math.min((totalWidth - (cardWidth * hand.length)) / Math.max(1, hand.length - 1), 40);
+        } else {
+            // If we have more cards than max, overlap them slightly
+            cardSpacing = (totalWidth - cardWidth) / Math.max(1, hand.length - 1);
+        }
         
         // Create a card for each ingredient in hand
         hand.forEach((ingredient, index) => {
@@ -242,7 +263,7 @@ export default class GameScene extends Phaser.Scene {
                 return;
             }
             
-            const x = startX + index * cardSpacing;
+            const x = margin + (cardWidth / 2) + (index * (cardWidth + cardSpacing));
             const card = new IngredientCard(
                 this,
                 x,
@@ -318,7 +339,7 @@ export default class GameScene extends Phaser.Scene {
         } else {
             const attributesText = this.add.text(
                 0, 
-                60, 
+                50, 
                 attributeText, 
                 { fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', align: 'center' } as TextStyle
             ).setOrigin(0.5).setName('attributes');
