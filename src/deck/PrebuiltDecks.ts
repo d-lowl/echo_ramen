@@ -1,4 +1,4 @@
-import { BasicIngredients } from "src/ingredients/BasicIngredients";
+import { BasicIngredients } from "../ingredients/BasicIngredients";
 import Deck from "./Deck";
 
 export function getPrebuiltDeck(name: string) {

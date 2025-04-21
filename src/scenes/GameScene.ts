@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
 import Button from '../components/Button';
-import Request from '../attributes/Request';
 import Game from '../game/Game';
-import Deck from '../deck/Deck';
-import { BasicIngredients } from '../ingredients/BasicIngredients';
 import IngredientCard from '../components/IngredientCard';
 import Ingredient from '../ingredients/Ingredient';
+import { getPrebuiltDeck } from "../deck/PrebuiltDecks";
 
 interface GameData {
     difficulty?: string;
@@ -41,7 +39,7 @@ export default class GameScene extends Phaser.Scene {
                               data.difficulty === 'medium' ? 2 : 1;
         
         // Create deck with all basic ingredients
-        const deck = new Deck(Object.values(BasicIngredients));
+        const deck = getPrebuiltDeck("basic")
         
         // Initialize game logic
         this.gameLogic = new Game(deck, difficultyLevel);
@@ -75,8 +73,8 @@ export default class GameScene extends Phaser.Scene {
         // Display player's hand
         this.displayHand();
         
-        // Create button container for game control buttons
-        const buttonContainer = this.add.container(this.cameras.main.width - 200, this.cameras.main.height - 300);
+        // Create button container for game control buttons - moved to bottom left
+        const buttonContainer = this.add.container(180, this.cameras.main.height - 100);
         
         // Add complete order button
         const completeOrderButton = new Button(
@@ -181,8 +179,8 @@ export default class GameScene extends Phaser.Scene {
      * Create the recipe display area
      */
     private createRecipeArea(): void {
-        // Create a recipe area on the right side
-        const recipeX = this.cameras.main.width - 600;
+        // Create a recipe area on the left side
+        const recipeX = 200;
         const recipeY = 280;
         const recipeWidth = 300;
         const recipeHeight = 150;
@@ -223,7 +221,7 @@ export default class GameScene extends Phaser.Scene {
     }
     
     /**
-     * Display the player's hand of ingredients
+     * Display the player's hand of ingredients in a 9x9 grid on the right side
      */
     private displayHand(): void {
         // Clear any existing cards
@@ -238,22 +236,16 @@ export default class GameScene extends Phaser.Scene {
             return;
         }
         
-        // Position variables - improved layout
+        // Position variables for 9x9 grid layout on right side
         const cardWidth = 140;
+        const cardHeight = 140;
         const margin = 20;
-        const totalWidth = this.cameras.main.width - (margin * 2);
-        const maxCards = 7; // Maximum number of fully visible cards
-        const y = this.cameras.main.height - 120;
-        
-        // Calculate spacing based on number of cards
-        let cardSpacing;
-        if (hand.length <= maxCards) {
-            // If we have fewer cards than max, space them evenly
-            cardSpacing = Math.min((totalWidth - (cardWidth * hand.length)) / Math.max(1, hand.length - 1), 40);
-        } else {
-            // If we have more cards than max, overlap them slightly
-            cardSpacing = (totalWidth - cardWidth) / Math.max(1, hand.length - 1);
-        }
+        const gridStartX = this.cameras.main.width - (cardWidth * 3) - margin;
+        const gridStartY = cardHeight;
+        const gridCols = 3;
+        const gridRows = 3;
+
+        console.log('Hand:', hand);
         
         // Create a card for each ingredient in hand
         hand.forEach((ingredient, index) => {
@@ -263,7 +255,14 @@ export default class GameScene extends Phaser.Scene {
                 return;
             }
             
-            const x = margin + (cardWidth / 2) + (index * (cardWidth + cardSpacing));
+            // Calculate grid position
+            const col = index % gridCols;
+            const row = Math.floor(index / gridCols) % gridRows;
+            
+            // Calculate actual position
+            const x = gridStartX + (col * cardWidth) + (cardWidth / 2);
+            const y = gridStartY + (row * cardHeight) + (cardHeight / 2);
+            
             const card = new IngredientCard(
                 this,
                 x,
