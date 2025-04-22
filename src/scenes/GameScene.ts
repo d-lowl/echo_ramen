@@ -243,6 +243,7 @@ export default class GameScene extends Phaser.Scene {
         ).setOrigin(0.5, 0); // Changed to align to top by setting y origin to 0
         
         this.recipeContainer.add([recipeBg, this.recipeText, this.recipeIngredients]);
+        this.updateRecipeDisplay();
     }
     
     /**
@@ -353,8 +354,22 @@ export default class GameScene extends Phaser.Scene {
         // Display recipe attributes
         const attributes = recipe.attributes;
         let attributeText = '';
-        for (const key in attributes) {
-            attributeText += `${key}: ${attributes[key].value}\n`;
+        
+        // Create properly formatted attribute table with even spacing
+        const nameWidth = 10; // Width for attribute name column
+        const valueWidth = 2;  // Width for value columns
+        
+        for (const attribute of Object.values(attributes)) {
+          const leftValue = attribute.value > 0 ? attribute.value : 0;
+          const rightValue = attribute.value < 0 ? -attribute.value : 0;
+          
+          // Format each value with padding to ensure alignment
+          const name = attribute.name.padStart(nameWidth, ' ');
+          const left = leftValue.toString().padStart(valueWidth, ' ');
+          const right = rightValue.toString().padEnd(valueWidth, ' ');
+          const opposite = attribute.getOppositeName();
+          
+          attributeText += `${name} - ${left} | ${right} - ${opposite}\n`;
         }
         
         // Create or update attributes text display
@@ -365,7 +380,12 @@ export default class GameScene extends Phaser.Scene {
                 0, 
                 50, 
                 attributeText, 
-                { fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', align: 'center' } as TextStyle
+                { 
+                    fontFamily: 'monospace', // Using monospace font ensures equal character width
+                    fontSize: '14px', 
+                    color: '#ffffff', 
+                    align: 'left' 
+                } as TextStyle
             ).setOrigin(0.5).setName('attributes');
             
             this.recipeContainer.add(attributesText);
