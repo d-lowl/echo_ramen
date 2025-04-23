@@ -4,6 +4,9 @@ import Game from '../game/Game';
 import IngredientCard from '../components/IngredientCard';
 import Ingredient from '../ingredients/Ingredient';
 import { getPrebuiltDeck } from "../deck/PrebuiltDecks";
+import AudioManager from '../managers/AudioManager';
+import SatisfactionManager, { SatisfactionLevel } from '../managers/SatisfactionManager';
+import SatisfactionUI from '../components/SatisfactionUI';
 
 interface GameData {
     difficulty?: string;
@@ -29,6 +32,8 @@ export default class GameScene extends Phaser.Scene {
     private recipeContainer: Phaser.GameObjects.Container;
     private recipeText: Phaser.GameObjects.Text;
     private recipeIngredients: Phaser.GameObjects.Text;
+    private audioManager: AudioManager;
+    private satisfactionUI: SatisfactionUI;
     
     constructor() {
         super('GameScene');
@@ -47,12 +52,24 @@ export default class GameScene extends Phaser.Scene {
     }
 
     preload(): void {
-        // No assets to load for now
+        // Initialize and preload audio
+        this.audioManager = new AudioManager(this);
+        this.audioManager.preload();
     }
 
     create(): void {
         // Set background
         this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0a0a1e).setOrigin(0);
+        
+        // Initialize audio
+        this.audioManager.create();
+        
+        // Create satisfaction UI (centered and slightly above center)
+        this.satisfactionUI = new SatisfactionUI(
+            this,
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 100
+        );
         
         // Add score display
         this.scoreText = this.add.text(
@@ -84,13 +101,35 @@ export default class GameScene extends Phaser.Scene {
             0,
             'COMPLETE ORDER',
             () => {
-                const scoreEarned = this.gameLogic.completeOrder();
-                console.log(`Order completed! Earned ${scoreEarned} points`);
-                this.updateScore();
-                this.displayCustomerRequest();
-                this.updateRecipeDisplay();
-                this.gameLogic.finishTurn();
-                this.displayHand();
+              // Get order result with details
+              const result = this.gameLogic.completeOrder();
+              console.log(`Order completed! Earned ${result.scoreEarned} points, Match: ${result.matchPercentage}%`);
+              
+              // Determine satisfaction level
+              const satisfactionLevel = SatisfactionManager.getSatisfactionLevel(result.matchPercentage);
+              
+              // Get feedback message
+              const feedbackMessage = SatisfactionManager.getFeedbackMessage(
+                  satisfactionLevel,
+                  result.details
+              );
+              
+              // Display satisfaction feedback
+              this.showSatisfactionFeedback(
+                  satisfactionLevel,
+                  feedbackMessage,
+                  result.matchPercentage
+              );
+              
+              // Update UI after a delay
+              this.time.delayedCall(3000, () => {
+                  this.satisfactionUI.hide();
+                  this.updateScore();
+                  this.displayCustomerRequest();
+                  this.updateRecipeDisplay();
+                  this.gameLogic.finishTurn();
+                  this.displayHand();
+              });
             },
             { 
                 fontSize: '28px', 
@@ -390,5 +429,51 @@ export default class GameScene extends Phaser.Scene {
             
             this.recipeContainer.add(attributesText);
         }
+    }
+
+    /**
+     * Show satisfaction feedback with visual and audio effects
+     */
+    private showSatisfactionFeedback(
+        level: SatisfactionLevel, 
+        message: string, 
+        matchPercentage: number
+    ): void {
+        // Display visual feedback
+        this.satisfactionUI.display(level, message, matchPercentage);
+        this.satisfactionUI.setDepth(1000); // Use high depth value to ensure it's on top
+        
+        // Play audio feedback
+        this.audioManager.play(`satisfaction-${level}`);
+        
+        // Add visual effect based on satisfaction level
+        const colors = {
+            'ecstatic': 0x00ff00,
+            'satisfied': 0x99ff00,
+            'neutral': 0xffcc00,
+            'dissatisfied': 0xff6600,
+            'disgusted': 0xff0000
+        };
+        
+        // Create a flash effect
+        const flash = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY,
+            this.cameras.main.width,
+            this.cameras.main.height,
+            colors[level],
+            0.3
+        ).setAlpha(0);
+        
+        // Animate the flash
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0, to: 0.3 },
+            yoyo: true,
+            duration: 500,
+            onComplete: () => {
+                flash.destroy();
+            }
+        });
     }
 } 

@@ -25,7 +25,7 @@ export class BasicEffect implements Effect {
     constructor(public attribute: string, public value: number) {}
 
     apply(recipe: Recipe) {
-        recipe.attributes[this.attribute.toLowerCase()].addValue(recipe.applySpecialEffects(this.value));
+        recipe.attributes[this.attribute].addValue(recipe.applySpecialEffects(this.value));
     }
     
     /**
@@ -43,10 +43,10 @@ export class BasicEffect implements Effect {
      * Helper to get opposite attribute name for negative values
      */
     private getOppositeAttributeName(attribute: string): string {
-        switch (attribute.toLowerCase()) {
-            case 'richness': return 'Lightness';
-            case 'spiciness': return 'Mildness';
-            case 'sweetness': return 'Savory';
+        switch (attribute) {
+            case 'Richness': return 'Lightness';
+            case 'Spiciness': return 'Mildness';
+            case 'Sweetness': return 'Savoryness';
             default: return `Not ${attribute}`;
         }
     }

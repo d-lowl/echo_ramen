@@ -12,9 +12,9 @@ class Recipe {
         this.ingredients = [];
         this.specialEffectQueue = [];
         this.attributes = {
-            "richness": new Attribute("Richness", 0, -10, 10),
-            "spiciness": new Attribute("Spiciness", 0, -10, 10),
-            "sweetness": new Attribute("Sweetness", 0, -10, 10),
+            "Richness": new Attribute("Richness", 0, -10, 10),
+            "Spiciness": new Attribute("Spiciness", 0, -10, 10),
+            "Sweetness": new Attribute("Sweetness", 0, -10, 10),
         };
     }
 
@@ -25,7 +25,6 @@ class Recipe {
     addIngredient(ingredient: Ingredient) {
         this.ingredients.push(ingredient);
         ingredient.applyEffects(this);
-        console.log(this.attributes);
     }
     
     /**
@@ -65,25 +64,23 @@ class Recipe {
         matchPercentage: number, 
         details: { [key: string]: { diff: number, match: number } } 
     } {
-        let totalDifference = 0;
-        const maxPossibleDifference = 60; // 3 attributes * 20 range (from -10 to 10)
         const details: { [key: string]: { diff: number, match: number } } = {};
         
         // Calculate difference for each attribute
         Object.keys(customerRequest.attributes).forEach(attr => {
             const requestedValue = customerRequest.attributes[attr].value;
             const currentValue = this.attributes[attr]?.value || 0;
+            const maxDiff = 10 + Math.abs(requestedValue);
             const diff = Math.abs(requestedValue - currentValue);
             
-            totalDifference += diff;
             details[attr] = {
                 diff: diff,
-                match: 100 - (diff / 20) * 100 // 20 is the max difference per attribute
+                match: 100 - (diff / maxDiff) * 100
             };
         });
         
         // Calculate overall match percentage
-        const matchPercentage = 100 - (totalDifference / maxPossibleDifference) * 100;
+        const matchPercentage = Object.values(details).reduce((sum, detail) => sum + detail.match, 0) / Object.keys(details).length;
         
         return {
             matchPercentage: Math.max(0, Math.round(matchPercentage)),

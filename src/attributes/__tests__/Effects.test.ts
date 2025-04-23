@@ -5,28 +5,28 @@ describe('Effects', () => {
   // BasicEffect Tests
   describe('BasicEffect', () => {
     it('should construct with attribute and value', () => {
-      const effect = new BasicEffect('richness', 5);
-      expect(effect.attribute).toBe('richness');
+      const effect = new BasicEffect('Richness', 5);
+      expect(effect.attribute).toBe('Richness');
       expect(effect.value).toBe(5);
     });
 
     it('apply() should modify the attribute by the correct amount', () => {
       const recipe = new Recipe();
-      const effect = new BasicEffect('richness', 5);
+      const effect = new BasicEffect('Richness', 5);
       
       effect.apply(recipe);
-      expect(recipe.attributes['richness'].value).toBe(5);
+      expect(recipe.attributes['Richness'].value).toBe(5);
       
-      const negativeEffect = new BasicEffect('richness', -3);
+      const negativeEffect = new BasicEffect('Richness', -3);
       negativeEffect.apply(recipe);
-      expect(recipe.attributes['richness'].value).toBe(2);
+      expect(recipe.attributes['Richness'].value).toBe(2);
     });
 
     it('display() should return readable description', () => {
-      const positiveEffect = new BasicEffect('richness', 5);
+      const positiveEffect = new BasicEffect('Richness', 5);
       expect(positiveEffect.display()).toBe('Richness 5');
       
-      const negativeEffect = new BasicEffect('richness', -5);
+      const negativeEffect = new BasicEffect('Richness', -5);
       expect(negativeEffect.display()).toBe('Lightness 5');
     });
   });
@@ -62,46 +62,46 @@ describe('Effects', () => {
   describe('BalanceEffect', () => {
     it('should balance positive values correctly', () => {
       const recipe = new Recipe();
-      recipe.attributes['richness'].setValue(5);
+      recipe.attributes['Richness'].setValue(5);
       
-      const effect = new BalanceEffect('richness');
+      const effect = new BalanceEffect('Richness');
       effect.apply(recipe);
       
-      expect(recipe.attributes['richness'].value).toBe(2); // Default amount is 3
+      expect(recipe.attributes['Richness'].value).toBe(2); // Default amount is 3
     });
 
     it('should balance negative values correctly', () => {
       const recipe = new Recipe();
-      recipe.attributes['richness'].setValue(-7);
+      recipe.attributes['Richness'].setValue(-7);
       
-      const effect = new BalanceEffect('richness');
+      const effect = new BalanceEffect('Richness');
       effect.apply(recipe);
       
-      expect(recipe.attributes['richness'].value).toBe(-4); // Default amount is 3
+      expect(recipe.attributes['Richness'].value).toBe(-4); // Default amount is 3
     });
 
     it('should respect the amount parameter', () => {
       const recipe = new Recipe();
-      recipe.attributes['richness'].setValue(8);
+      recipe.attributes['Richness'].setValue(8);
       
-      const effect = new BalanceEffect('richness', 5);
+      const effect = new BalanceEffect('Richness', 5);
       effect.apply(recipe);
       
-      expect(recipe.attributes['richness'].value).toBe(3);
+      expect(recipe.attributes['Richness'].value).toBe(3);
     });
 
     it('should not modify zero values', () => {
       const recipe = new Recipe();
-      recipe.attributes['richness'].setValue(0);
+      recipe.attributes['Richness'].setValue(0);
       
-      const effect = new BalanceEffect('richness');
+      const effect = new BalanceEffect('Richness');
       effect.apply(recipe);
       
-      expect(recipe.attributes['richness'].value).toBe(0);
+      expect(recipe.attributes['Richness'].value).toBe(0);
     });
 
     it('display() should return readable description', () => {
-      const effect = new BalanceEffect('richness');
+      const effect = new BalanceEffect('Richness');
       expect(effect.display()).toBe('Balance');
     });
   });

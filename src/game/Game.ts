@@ -122,18 +122,25 @@ export default class Game {
     
     /**
      * Complete the current order and generate a new request
-     * @returns The score earned for this order
+     * @returns Object with score earned, match percentage and details
      */
-    completeOrder(): number {
+    completeOrder(): { scoreEarned: number, matchPercentage: number, details: { [key: string]: { diff: number, match: number } } } {
         const result = this.evaluateRecipe();
         const scoreEarned = Math.ceil(result.matchPercentage);
         this.addScore(scoreEarned);
+        
+        // Store the result for returning
+        const orderResult = {
+            scoreEarned,
+            matchPercentage: result.matchPercentage,
+            details: result.details
+        };
         
         // Reset recipe and generate new request
         this.currentRecipe = new Recipe();
         this.generateNewRequest();
         
-        return scoreEarned;
+        return orderResult;
     }
     
     /**

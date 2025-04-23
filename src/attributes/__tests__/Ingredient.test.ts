@@ -6,7 +6,7 @@ describe('Ingredient', () => {
   // Constructor Tests
   describe('Constructor', () => {
     it('should create ingredient with name and effects', () => {
-      const effects = [new BasicEffect('richness', 5)];
+      const effects = [new BasicEffect('Richness', 5)];
       const ingredient = new Ingredient('Rice', effects);
       
       expect(ingredient.getName()).toBe('Rice');
@@ -26,24 +26,24 @@ describe('Ingredient', () => {
     it('applyEffects() should apply all effects to a recipe', () => {
       const recipe = new Recipe();
       const effects = [
-        new BasicEffect('richness', 3),
-        new BasicEffect('spiciness', 2),
-        new BasicEffect('sweetness', -1)
+        new BasicEffect('Richness', 3),
+        new BasicEffect('Spiciness', 2),
+        new BasicEffect('Sweetness', -1)
       ];
       const ingredient = new Ingredient('Pork', effects);
       
       ingredient.applyEffects(recipe);
       
-      expect(recipe.attributes['richness'].value).toBe(3);
-      expect(recipe.attributes['spiciness'].value).toBe(2);
-      expect(recipe.attributes['sweetness'].value).toBe(-1);
+      expect(recipe.attributes['Richness'].value).toBe(3);
+      expect(recipe.attributes['Spiciness'].value).toBe(2);
+      expect(recipe.attributes['Sweetness'].value).toBe(-1);
     });
 
     it('should apply special effect correctly', () => {
       const recipe = new Recipe();
       const effects = [
         new AmplifyEffect(),
-        new BasicEffect('richness', 3)
+        new BasicEffect('Richness', 3)
       ];
       const ingredient = new Ingredient('Chili Oil', effects);
       
@@ -60,7 +60,7 @@ describe('Ingredient', () => {
     it('should clear special effects after applying non-special effects', () => {
       const recipe = new Recipe();
       const effects = [
-        new BasicEffect('richness', 3),
+        new BasicEffect('Richness', 3),
         new AmplifyEffect()
       ];
       const ingredient = new Ingredient('Garlic', effects);
@@ -78,7 +78,7 @@ describe('Ingredient', () => {
     it('should clear special effects when all effects have been applied', () => {
       const recipe = new Recipe();
       const effects = [
-        new BasicEffect('richness', 3)
+        new BasicEffect('Richness', 3)
       ];
       const ingredient = new Ingredient('Garlic', effects);
       
@@ -99,14 +99,14 @@ describe('Ingredient', () => {
     });
 
     it('getEffects() should return a copy of the effects array', () => {
-      const effects = [new BasicEffect('richness', 5)];
+      const effects = [new BasicEffect('Richness', 5)];
       const ingredient = new Ingredient('Egg', effects);
       
       const returnedEffects = ingredient.getEffects();
       expect(returnedEffects).toEqual(effects);
       
       // Verify it's a copy by modifying the returned array
-      returnedEffects.push(new BasicEffect('spiciness', 2));
+      returnedEffects.push(new BasicEffect('Spiciness', 2));
       expect(ingredient.getEffects()).toEqual(effects);
     });
   });

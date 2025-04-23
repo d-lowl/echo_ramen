@@ -70,7 +70,7 @@ describe('Attribute', () => {
       
       expect(richness.getOppositeName()).toBe('Lightness');
       expect(spiciness.getOppositeName()).toBe('Mildness');
-      expect(sweetness.getOppositeName()).toBe('Savory');
+      expect(sweetness.getOppositeName()).toBe('Savoryness');
       expect(other.getOppositeName()).toBe('Not Other');
     });
 
