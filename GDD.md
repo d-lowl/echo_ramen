@@ -65,10 +65,7 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
    - Feedback on what could be improved
 
 5. **Progression**
-   - Earn cryptocurrency from satisfied customers
-   - Buy new ingredients for fridge
-   - Upgrade kitchen capabilities with cybernetic enhancements
-   - Handle random events affecting inventory
+   - TBD
 
 ## Game Elements
 
@@ -97,11 +94,7 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
 - Cybernetic enhancements for kitchen efficiency
 
 ### Progression System
-- Cryptocurrency earned from successful orders
-- New ingredient unlocks from various districts
-- Kitchen upgrades with cybernetic enhancements
-- Special recipe discoveries from data fragments
-- Reputation system affecting customer types and access to premium ingredients
+- TBD
 
 ### UI/UX Elements
 - Holographic attribute sliders
@@ -204,6 +197,85 @@ Basic ingredients structure:
     - Sweetness -2 (i.e. Savoryness +2)
     - Spiciness +1
 ```
+
+## Demo Game Loop
+
+3 floors:
+- 1st floor: difficulty 1, 10 customers
+- 2nd floor: difficulty 2, 10 customers
+- 3rd floor: difficulty 3, 10 customers
+- Boss floor: difficulty 4, 2 customers
+
+Loop:
+- Floor starts
+    - Customer arrives
+    - Select ingredients
+    - Create recipe
+    - Serve ramen
+    - Receive score
+    - You can remove one card from the fridge
+    - You can add one of three random cards to the fridge
+- Random Special Event when Floor ends
+
+## Floor End Random Events
+
+When a floor ends, one of the following three events will trigger:
+
+1. **Quantum Fusion Lab**
+   - Two options:
+     - Fusion: Combine two thirds of the deck randomly pairwise, to create a new ones combining the effects of each pair. I.e. if the deck is [Aa, Bb, Cc, Dd, Ee, Ff], the new deck may be [AaBb, CcDd, Ee, Ff].
+     - Crossover: Crossover two thirds of the deck randomly pairwise, to create a new ones shuffling the effects of each pair. I.e. if the deck is [Aa, Bb, Cc, Dd, Ee, Ff], the new deck may be [Ab, Ba, Cd, Dc, Ee, Ff].
+
+2. **Black Market Dealer**
+   - Two options:
+     - Risk Deal: Add three powerful black market ingredients to your deck. Each ingredient has a major positive effect (+3 to one attribute) but also includes a significant drawback (e.g., -1 to other attributes, 30% chance to glitch, or locks a different random ingredient for one customer).
+     - Safe Deal: Remove up to three ingredients from your deck and receive one guaranteed stable ingredient for each removed (basic ingredients with standard effects but no drawbacks).
+
+3. **Cybernetic Enhancement**
+   - Two options:
+     - Amplification: Boost the positive effects of all ingredients in your deck by 25%, but also intensify all negative effects by 25% (e.g., +2 becomes +2.5, -1 becomes -1.25).
+     - Stabilization: Reduce all positive effects in your deck by 25%, but also reduce all negative effects by 50% (e.g., +2 becomes +1.5, -1 becomes -0.5).
+
+## Card Management Events
+
+### Removing a Card Event
+- The "Fridge Cleanup" interface appears after serving each customer
+- You can select one ingredient card to permanently remove from your deck
+- The interface shows your current deck composition by attribute balance
+- Removing cards helps maintain deck efficiency and strategy focus
+- When hovering over a card, the interface highlights its impact on your overall attribute balance
+- Strategic considerations are shown (e.g., "Removing this will increase your average Spiciness")
+- Higher difficulty floors provide special removal options (e.g., remove and gain a small additional benefit)
+
+### Adding a Card Event
+- The "Ingredient Acquisition" interface presents three random ingredient cards
+- You must select one card to add to your fridge
+- Options include:
+  - Standard ingredients (basic attribute effects)
+  - Modified ingredients (enhanced standard ingredients with stronger effects)
+  - Special ingredients (unique effects that modify game mechanics)
+- Higher difficulty floors offer more powerful ingredient options
+- The interface provides a preview of how each ingredient would affect your overall attribute balance
+- Cards that create powerful synergies with your existing deck are highlighted
+
+## Boss Encounters
+
+### Boss 1: "The Food Critic"
+- A notorious cyberpunk food critic with an extremely refined palate
+- Requires perfect balance across multiple attributes
+- Special mechanic: "Refined Palate" - Changes preferred attributes mid-service
+- Requires the player to adapt their strategy and ingredient use on the fly
+- Defeat rewards: A signature ingredient with the ability to adjust an attribute by +/-1 after being played
+
+### Boss 2: "Chef Neuromancer"
+- A legendary ramen chef augmented with cutting-edge AI technology
+- Creates "perfect" ramen that sets an extremely high benchmark
+- Special mechanic: "Neural Recipe Network" - Learns from player's ingredient choices
+- Counters the player's strategy by adapting preferences based on previous ingredient selections
+- Defeat rewards: A special "AI Assistant" effect that can predict customer preferences one turn in advance
+
+
+
 
 
 
