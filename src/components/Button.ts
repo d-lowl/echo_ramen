@@ -29,6 +29,7 @@ export default class Button {
     private scene: Phaser.Scene;
     private text: Phaser.GameObjects.Text;
     private bg: Phaser.GameObjects.Rectangle;
+    private shadow: Phaser.GameObjects.Rectangle;
 
     constructor(scene: Phaser.Scene, x: number, y: number, text: string, onClick?: () => void, style: ButtonStyle = {}) {
         this.scene = scene;
@@ -44,7 +45,7 @@ export default class Button {
                 y: 10
             },
             stroke: '#ff00ff',
-            strokeThickness: 1,
+            strokeThickness: 2,
             shadow: {
                 offsetX: 2,
                 offsetY: 2,
@@ -53,8 +54,8 @@ export default class Button {
                 stroke: true,
                 fill: true
             },
-            bgColor: 0x1a1a3a,
-            hoverColor: 0x3a3a5a
+            bgColor: 0x222255,
+            hoverColor: 0x334499
         };
         
         // Merge default and custom styles
@@ -86,24 +87,23 @@ export default class Button {
             buttonStyle.bgColor
         ).setOrigin(0.5).setStrokeStyle(2, 0xff00ff);
         
-        // // After creating both elements, apply shadow to text if specified
-        // if (buttonStyle.shadow) {
-        //     this.text.setShadow(
-        //         buttonStyle.shadow.offsetX,
-        //         buttonStyle.shadow.offsetY,
-        //         buttonStyle.shadow.color,
-        //         buttonStyle.shadow.blur,
-        //         buttonStyle.shadow.stroke,
-        //         buttonStyle.shadow.fill
-        //     );
-        // }
+        // Shadow effect for 3D appearance
+        this.shadow = scene.add.rectangle(
+            x + 4, 
+            y + 4, 
+            width + 10,
+            height + 10, 
+            0x000000,
+            0.3
+        ).setOrigin(0.5);
+        
+        // Ensure proper rendering order
+        this.shadow.setDepth(0);
+        this.bg.setDepth(1);
+        this.text.setDepth(2);
         
         // Make text interactive after setting all properties
         this.text.setInteractive({ useHandCursor: true });
-        
-        // Ensure text is on top
-        this.bg.setDepth(1);
-        this.text.setDepth(2);
         
         // Add hover and click effects
         this.text.on('pointerover', () => {
@@ -130,7 +130,7 @@ export default class Button {
             if (buttonStyle.bgColor) {
                 this.bg.setFillStyle(buttonStyle.bgColor);
             } else {
-                this.bg.setFillStyle(0x1a1a3a);
+                this.bg.setFillStyle(0x222255);
             }
             if (onClick) {
                 onClick();
@@ -141,15 +141,17 @@ export default class Button {
     setVisible(visible: boolean): this {
         this.text.setVisible(visible);
         this.bg.setVisible(visible);
+        this.shadow.setVisible(visible);
         return this;
     }
     
     destroy(): void {
         this.text.destroy();
         this.bg.destroy();
+        this.shadow.destroy();
     }
 
     getGameObjects(): (Phaser.GameObjects.Text | Phaser.GameObjects.Rectangle)[] {
-        return [this.bg, this.text];
+        return [this.shadow, this.bg, this.text];
     }
 } 

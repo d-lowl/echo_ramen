@@ -7,9 +7,14 @@ import { getPrebuiltDeck } from "../deck/PrebuiltDecks";
 import AudioManager from '../managers/AudioManager';
 import SatisfactionManager, { SatisfactionLevel } from '../managers/SatisfactionManager';
 import SatisfactionUI from '../components/SatisfactionUI';
+import ProgressionManager, { FloorData, ProgressionEvent } from '../managers/ProgressionManager';
+import ProgressionUI from '../components/ProgressionUI';
 
 interface GameData {
     difficulty?: string;
+    floorData?: FloorData;
+    fromFloorTransition?: boolean;
+    newGame?: boolean;
 }
 
 interface TextStyle {
@@ -34,13 +39,22 @@ export default class GameScene extends Phaser.Scene {
     private recipeIngredients: Phaser.GameObjects.Text;
     private audioManager: AudioManager;
     private satisfactionUI: SatisfactionUI;
+    private progressionManager: ProgressionManager;
+    private progressionUI: ProgressionUI;
+    private totalCustomersServed: number = 0;
+    private waitingForNextCustomer: boolean = false;
     
     constructor() {
         super('GameScene');
     }
 
     init(data: GameData): void {
-        // Initialize the game with passed difficulty
+        // Reset game state if starting new game
+        if (data.newGame) {
+            this.totalCustomersServed = 0;
+        }
+        
+        // Initialize the game with passed difficulty or default to 1
         const difficultyLevel = data.difficulty === 'hard' ? 3 : 
                               data.difficulty === 'medium' ? 2 : 1;
         
@@ -49,20 +63,77 @@ export default class GameScene extends Phaser.Scene {
         
         // Initialize game logic
         this.gameLogic = new Game(deck, difficultyLevel);
+        
+        // Initialize progression manager if not coming from floor transition
+        if (!data.fromFloorTransition) {
+            this.waitingForNextCustomer = false;
+        } else {
+            // Coming from floor transition - use the floor data
+            this.waitingForNextCustomer = false;
+            if (data.floorData) {
+                this.gameLogic.setDifficulty(data.floorData.difficulty);
+                
+                // Make sure to regenerate the request with the new difficulty
+                const isBossFloor = data.floorData.isBossFloor;
+                const isBossCustomer = isBossFloor && data.floorData.currentCustomer === (isBossFloor ? 2 : 0);
+                this.gameLogic.generateNewRequest(isBossCustomer);
+            }
+        }
+        
+        // Clear existing UI elements to prevent stale references
+        this.requestText = null;
     }
 
     preload(): void {
         // Initialize and preload audio
         this.audioManager = new AudioManager(this);
         this.audioManager.preload();
+        
+        // Create a pixel texture for particles if it doesn't exist
+        if (!this.textures.exists('pixel')) {
+            const graphics = this.make.graphics({ x: 0, y: 0 });
+            graphics.fillStyle(0xffffff);
+            graphics.fillRect(0, 0, 2, 2);
+            graphics.generateTexture('pixel', 2, 2);
+            graphics.destroy();
+        }
+
+        // Create a scan line texture
+        if (!this.textures.exists('scanline')) {
+            const scanGraphics = this.make.graphics({ x: 0, y: 0 });
+            scanGraphics.fillStyle(0xffffff);
+            scanGraphics.fillRect(0, 0, 800, 1);
+            scanGraphics.generateTexture('scanline', 800, 1);
+            scanGraphics.destroy();
+        }
     }
 
-    create(): void {
+    create(data: GameData): void {
         // Set background
         this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0a0a1e).setOrigin(0);
         
+        // Add cyberpunk grid shader effect
+        this.createCyberpunkBackgroundEffect();
+        
+        // Add scan lines overlay
+        this.createScanLinesEffect();
+        
         // Initialize audio
         this.audioManager.create();
+        
+        // Create progression manager
+        this.progressionManager = new ProgressionManager(this, this.gameLogic);
+        
+        // Create progression UI
+        this.progressionUI = new ProgressionUI(
+            this,
+            this.cameras.main.width - 150,
+            60,
+            this.progressionManager.getCurrentFloorData()
+        );
+        
+        // Setup progression event listeners
+        this.setupProgressionEvents();
         
         // Create satisfaction UI (centered and slightly above center)
         this.satisfactionUI = new SatisfactionUI(
@@ -78,6 +149,9 @@ export default class GameScene extends Phaser.Scene {
             `SCORE: ${this.gameLogic.getScore()}`, 
             { fontFamily: 'Arial', fontSize: '32px', color: '#00ffff', stroke: '#000000', strokeThickness: 3 } as TextStyle
         );
+        
+        // Add neon glow effect to score
+        this.addNeonGlowEffect(this.scoreText);
         
         // Display customer request
         this.displayCustomerRequest();
@@ -101,9 +175,14 @@ export default class GameScene extends Phaser.Scene {
             0,
             'COMPLETE ORDER',
             () => {
+              if (this.waitingForNextCustomer) return;
+              
               // Get order result with details
               const result = this.gameLogic.completeOrder();
               console.log(`Order completed! Earned ${result.scoreEarned} points, Match: ${result.matchPercentage}%`);
+              
+              // Increment total customers served
+              this.totalCustomersServed++;
               
               // Determine satisfaction level
               const satisfactionLevel = SatisfactionManager.getSatisfactionLevel(result.matchPercentage);
@@ -121,14 +200,18 @@ export default class GameScene extends Phaser.Scene {
                   result.matchPercentage
               );
               
+              // Prevent clicking during transition
+              this.waitingForNextCustomer = true;
+              
               // Update UI after a delay
               this.time.delayedCall(3000, () => {
                   this.satisfactionUI.hide();
                   this.updateScore();
-                  this.displayCustomerRequest();
+                  this.progressionManager.nextCustomer();
                   this.updateRecipeDisplay();
                   this.gameLogic.finishTurn();
                   this.displayHand();
+                  this.waitingForNextCustomer = false;
               });
             },
             { 
@@ -139,11 +222,12 @@ export default class GameScene extends Phaser.Scene {
                 hoverColor: 0x334499,
                 stroke: '#ff00ff',
                 strokeThickness: 2,
+                color: '#00ffff',
                 shadow: {
-                    offsetX: 3,
-                    offsetY: 3,
+                    offsetX: 2,
+                    offsetY: 2,
                     color: '#000000',
-                    blur: 5,
+                    blur: 3,
                     stroke: true,
                     fill: true
                 }
@@ -174,8 +258,8 @@ export default class GameScene extends Phaser.Scene {
         // Add "View Deck" button
         this.viewDeckButton = new Button(
             this,
-            this.cameras.main.width - 120,
-            80,
+            110,
+            110,
             'VIEW DECK',
             () => {
                 // Launch the ViewDeckScene
@@ -186,7 +270,18 @@ export default class GameScene extends Phaser.Scene {
                 width: 160,
                 height: 50,
                 bgColor: 0x222255,
-                hoverColor: 0x334499
+                hoverColor: 0x334499,
+                stroke: '#ff00ff',
+                strokeThickness: 2,
+                color: '#00ffff',
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 3,
+                    stroke: true,
+                    fill: true
+                }
             }
         );
         
@@ -194,6 +289,51 @@ export default class GameScene extends Phaser.Scene {
         const viewDeckButtonObjects = this.viewDeckButton.getGameObjects();
         this.add.existing(viewDeckButtonObjects[0]);
         this.add.existing(viewDeckButtonObjects[1]);
+
+        // Update initial boss state if needed
+        if (this.progressionManager.isCurrentCustomerBoss()) {
+            this.gameLogic.setCurrentCustomerAsBoss(true);
+            this.displayCustomerRequest();
+        }
+    }
+
+    private setupProgressionEvents(): void {
+        // Handle new customer event
+        this.progressionManager.on(ProgressionEvent.NEW_CUSTOMER, (data: any) => {
+            // Update UI
+            this.progressionUI.update(this.progressionManager.getCurrentFloorData());
+            
+            // Set boss state if needed
+            this.gameLogic.setCurrentCustomerAsBoss(data.isBoss);
+            
+            // Update customer request display
+            this.displayCustomerRequest();
+        });
+        
+        // Handle floor completion
+        this.progressionManager.on(ProgressionEvent.FLOOR_COMPLETE, (data: any) => {
+            // Transition to floor completion scene
+            this.cameras.main.fadeOut(500, 0, 0, 0, (camera, progress) => {
+                if (progress === 1) {
+                    this.scene.start('FloorTransitionScene', {
+                        floorData: this.progressionManager.getCurrentFloorData()
+                    });
+                }
+            });
+        });
+        
+        // Handle game completion
+        this.progressionManager.on(ProgressionEvent.GAME_COMPLETE, (data: any) => {
+            // Transition to game completion scene
+            this.cameras.main.fadeOut(500, 0, 0, 0, (camera, progress) => {
+                if (progress === 1) {
+                    this.scene.start('GameCompletionScene', {
+                        score: this.gameLogic.getScore(),
+                        totalCustomers: this.totalCustomersServed
+                    });
+                }
+            });
+        });
     }
 
     update(): void {
@@ -204,6 +344,51 @@ export default class GameScene extends Phaser.Scene {
      */
     private updateScore(): void {
         this.scoreText.setText(`SCORE: ${this.gameLogic.getScore()}`);
+        
+        // Add glitch effect to score when it updates
+        this.addGlitchEffect(this.scoreText);
+    }
+    
+    /**
+     * Adds a brief digital glitch effect to a text object
+     */
+    private addGlitchEffect(target: Phaser.GameObjects.Text): void {
+        // Store original position and text
+        const originalX = target.x;
+        const originalText = target.text;
+        const originalColor = target.style.color;
+        
+        // First glitch - position shift
+        this.tweens.add({
+            targets: target,
+            x: originalX + Phaser.Math.Between(-5, 5),
+            duration: 50,
+            yoyo: true,
+            onComplete: () => {
+                // Corrupt text with random characters
+                const corruptedText = originalText.split('').map(char => {
+                    return Math.random() > 0.7 ? 
+                        String.fromCharCode(Phaser.Math.Between(33, 126)) : char;
+                }).join('');
+                target.setText(corruptedText);
+                target.setColor('#ff00ff');
+                
+                // Wait a bit then restore text
+                this.time.delayedCall(50, () => {
+                    // Restore original text
+                    target.setText(originalText);
+                    target.setColor(originalColor);
+                    
+                    // Second glitch - position shift
+                    this.tweens.add({
+                        targets: target,
+                        x: originalX + Phaser.Math.Between(-3, 3),
+                        duration: 30,
+                        yoyo: true
+                    });
+                });
+            }
+        });
     }
     
     /**
@@ -212,30 +397,47 @@ export default class GameScene extends Phaser.Scene {
     private displayCustomerRequest(): void {
         const request = this.gameLogic.getCurrentRequest();
         
-        // Log the raw request values for debugging
-        console.log('Customer Request Values:', request.attributes);
+        // Safety check - ensure we have a valid request
+        if (!request) {
+            console.warn('No valid customer request found');
+            return;
+        }
         
-        // Format the request text with attribute values
-        const requestString = `CUSTOMER REQUEST:\n${request.getDescription()}`;
+        // Get request description with safety check
+        let requestDescription;
+        try {
+            requestDescription = request.getDescription();
+        } catch (error) {
+            console.error('Error getting request description:', error);
+            requestDescription = 'Customer Request';
+        }
         
-        // Update or create the request text
-        if (this.requestText) {
-            this.requestText.setText(requestString);
-        } else {
+        // Check if we need to create the request text
+        if (!this.requestText) {
             this.requestText = this.add.text(
-                this.cameras.main.centerX,
-                100,
-                requestString,
+                this.cameras.main.centerX-40,
+                20,
+                `Customer Request:\n${requestDescription}`,
                 { 
                     fontFamily: 'Arial', 
                     fontSize: '28px', 
-                    color: '#ffcc00',
+                    color: '#00ffff',
                     align: 'center',
                     stroke: '#000000',
                     strokeThickness: 2,
                     shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 2, stroke: true, fill: true }
                 } as TextStyle
-            ).setOrigin(0.5);
+            ).setOrigin(0.5, 0.0);
+        } else {
+            // Update existing text
+            this.requestText.setText(`Customer Request:\n${requestDescription}`);
+        }
+        
+        // Highlight boss requests with red text
+        if (this.gameLogic.isCurrentCustomerBoss()) {
+            this.requestText.setColor('#ff5555');
+        } else {
+            this.requestText.setColor('#00ffff');
         }
     }
     
@@ -252,7 +454,7 @@ export default class GameScene extends Phaser.Scene {
         this.recipeContainer = this.add.container(recipeX, recipeY);
         
         const recipeBg = this.add.rectangle(0, 0, recipeWidth, recipeHeight, 0x222244)
-            .setStrokeStyle(3, 0x00ffff)
+            .setStrokeStyle(3, 0xff00ff)
             .setAlpha(0.9);
             
         this.recipeText = this.add.text(
@@ -262,7 +464,7 @@ export default class GameScene extends Phaser.Scene {
             { 
                 fontFamily: 'Arial', 
                 fontSize: '24px', 
-                color: '#ffffff',
+                color: '#00ffff',
                 stroke: '#000000',
                 strokeThickness: 1
             } as TextStyle
@@ -275,7 +477,7 @@ export default class GameScene extends Phaser.Scene {
             { 
                 fontFamily: 'Arial', 
                 fontSize: '16px', 
-                color: '#cccccc', 
+                color: '#ffffff', 
                 align: 'center',
                 wordWrap: { width: 280 }
             } as TextStyle
@@ -361,19 +563,98 @@ export default class GameScene extends Phaser.Scene {
         const x = this.cameras.main.centerX;
         const y = this.cameras.main.centerY;
         
-        const effect = this.add.rectangle(x, y, 50, 50, 0x00ff00, 0.5)
-            .setAlpha(0);
+        // Create explosion particle effect
+        const particles = this.add.particles(x, y, 'pixel', {
+            speed: { min: 100, max: 300 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 1, end: 0 },
+            lifespan: 800,
+            blendMode: Phaser.BlendModes.ADD,
+            tint: [ 0x00ffff, 0xff00ff, 0xffff00 ],
+            quantity: 30,
+            gravityY: 200
+        });
         
+        // Emit particles once then destroy the emitter
+        particles.explode();
+        
+        // Add a ripple effect
+        const ripple = this.add.circle(x, y, 5, 0x00ffff, 0.7);
+        ripple.setStrokeStyle(2, 0xff00ff);
+        
+        // Scale and fade the ripple
         this.tweens.add({
-            targets: effect,
-            alpha: 0.8,
-            scale: 2,
-            duration: 300,
-            yoyo: true,
+            targets: ripple,
+            radius: 100,
+            alpha: 0,
+            duration: 600,
+            ease: 'Quad.easeOut',
             onComplete: () => {
-                effect.destroy();
+                ripple.destroy();
             }
         });
+        
+        // Play a sound effect
+        this.audioManager.play('card-play');
+        
+        // Flash the recipe container
+        const recipeGlow = this.add.rectangle(
+            this.recipeContainer.x, 
+            this.recipeContainer.y, 
+            310, 
+            160, 
+            0xff00ff, 
+            0.4
+        );
+        recipeGlow.setBlendMode(Phaser.BlendModes.ADD);
+        
+        // Animate the recipe glow
+        this.tweens.add({
+            targets: recipeGlow,
+            alpha: 0,
+            duration: 500,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                recipeGlow.destroy();
+            }
+        });
+        
+        // Create data lines effect (connecting particles to recipe)
+        this.createDataLinesEffect(x, y, this.recipeContainer.x, this.recipeContainer.y);
+    }
+    
+    /**
+     * Create "data transfer" effect with moving particles along a line
+     */
+    private createDataLinesEffect(startX: number, startY: number, endX: number, endY: number): void {
+        // Calculate the angle between start and end points
+        const angle = Phaser.Math.Angle.Between(startX, startY, endX, endY);
+        
+        // Create straight line of particles from card to recipe
+        for (let i = 0; i < 20; i++) {
+            // Create individual particles along the line
+            const t = i / 20;
+            const x = startX + (endX - startX) * t;
+            const y = startY + (endY - startY) * t;
+            
+            // Delay each particle slightly for sequence effect
+            this.time.delayedCall(i * 15, () => {
+                const particle = this.add.particles(x, y, 'pixel', {
+                    scale: { start: 0.8, end: 0.1 },
+                    alpha: { start: 1, end: 0 },
+                    tint: 0x00ffff,
+                    lifespan: 300,
+                    quantity: 1,
+                    frequency: 1000,
+                    blendMode: Phaser.BlendModes.ADD
+                });
+                
+                // Clean up particle after animation
+                this.time.delayedCall(400, () => {
+                    particle.destroy();
+                });
+            });
+        }
     }
     
     /**
@@ -422,8 +703,10 @@ export default class GameScene extends Phaser.Scene {
                 { 
                     fontFamily: 'monospace', // Using monospace font ensures equal character width
                     fontSize: '14px', 
-                    color: '#ffffff', 
-                    align: 'left' 
+                    color: '#00ffff', 
+                    align: 'left',
+                    stroke: '#000000',
+                    strokeThickness: 1
                 } as TextStyle
             ).setOrigin(0.5).setName('attributes');
             
@@ -474,6 +757,146 @@ export default class GameScene extends Phaser.Scene {
             onComplete: () => {
                 flash.destroy();
             }
+        });
+    }
+
+    /**
+     * Create a cyberpunk-styled background with animated grid and glow effects
+     */
+    private createCyberpunkBackgroundEffect(): void {
+        // Add a subtle grid pattern
+        const gridGraphics = this.add.graphics();
+        gridGraphics.lineStyle(1, 0x00ffff, 0.2);
+        
+        const cellSize = 40;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // Draw vertical lines
+        for (let x = 0; x <= width; x += cellSize) {
+            gridGraphics.moveTo(x, 0);
+            gridGraphics.lineTo(x, height);
+        }
+        
+        // Draw horizontal lines
+        for (let y = 0; y <= height; y += cellSize) {
+            gridGraphics.moveTo(0, y);
+            gridGraphics.lineTo(width, y);
+        }
+        
+        gridGraphics.strokePath();
+        
+        // Add ambient particles
+        this.createAmbientParticles();
+        
+        // Animate grid with periodic pulse
+        this.tweens.add({
+            targets: gridGraphics,
+            alpha: 0.1,
+            duration: 3000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
+    
+    /**
+     * Create ambient cyberpunk particles floating in the background
+     */
+    private createAmbientParticles(): void {
+        // Create particle emitter for cyan particles
+        const cyanParticles = this.add.particles(0, 0, 'pixel', {
+            x: { min: 0, max: this.cameras.main.width },
+            y: { min: 0, max: this.cameras.main.height },
+            scale: { start: 0.5, end: 0 },
+            speed: { min: 10, max: 50 },
+            angle: { min: 0, max: 360 },
+            blendMode: Phaser.BlendModes.ADD,
+            tint: 0x00ffff,
+            lifespan: 4000,
+            gravityY: -10,
+            frequency: 200,
+            alpha: { start: 0.6, end: 0 },
+        });
+        
+        // Create particle emitter for magenta particles
+        const magentaParticles = this.add.particles(0, 0, 'pixel', {
+            x: { min: 0, max: this.cameras.main.width },
+            y: { min: 0, max: this.cameras.main.height },
+            scale: { start: 0.5, end: 0 },
+            speed: { min: 10, max: 50 },
+            angle: { min: 0, max: 360 },
+            blendMode: Phaser.BlendModes.ADD,
+            tint: 0xff00ff,
+            lifespan: 4000,
+            gravityY: -10,
+            frequency: 300,
+            alpha: { start: 0.6, end: 0 },
+        });
+        
+        // Set depth to ensure they appear behind other elements
+        cyanParticles.setDepth(-10);
+        magentaParticles.setDepth(-10);
+    }
+
+    /**
+     * Creates a scan line effect overlay for a retro cyberpunk feel
+     */
+    private createScanLinesEffect(): void {
+        // Create scan lines
+        const scanLines = this.add.tileSprite(
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            this.cameras.main.width,
+            this.cameras.main.height,
+            'scanline'
+        );
+        
+        // Set blend mode and opacity
+        scanLines.setBlendMode(Phaser.BlendModes.MULTIPLY);
+        scanLines.setAlpha(0.07);
+        
+        // Set high depth to overlay on top of game elements
+        scanLines.setDepth(1000);
+        
+        // Animate scan lines
+        this.tweens.add({
+            targets: scanLines,
+            y: '+=' + this.cameras.main.height,
+            duration: 4000,
+            repeat: -1
+        });
+    }
+
+    /**
+     * Adds a neon glow effect to a text object
+     */
+    private addNeonGlowEffect(textObject: Phaser.GameObjects.Text): void {
+        // Create glow rectangle that matches text size
+        const bounds = textObject.getBounds();
+        const glowRect = this.add.rectangle(
+            bounds.centerX,
+            bounds.centerY,
+            bounds.width + 20,
+            bounds.height + 10,
+            0x00ffff,
+            0.2
+        );
+        
+        // Set blend mode for glow effect
+        glowRect.setBlendMode(Phaser.BlendModes.ADD);
+        
+        // Position behind text
+        glowRect.setDepth(textObject.depth - 1);
+        
+        // Add subtle pulsing animation to the glow
+        this.tweens.add({
+            targets: glowRect,
+            alpha: 0.1,
+            duration: 1500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
         });
     }
 } 

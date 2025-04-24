@@ -9,8 +9,10 @@ export default class Game {
     private currentRecipe: Recipe;
     private hand: Ingredient[] = [];
     private handSize: number = 9;
+    public difficulty: number;
+    private isBossCustomer: boolean = false;
     
-    constructor(public deck: Deck, public difficulty: number) {
+    constructor(public deck: Deck, difficulty: number) {
         this.deck = deck;
         this.difficulty = difficulty;
         this.currentRecipe = new Recipe();
@@ -67,9 +69,11 @@ export default class Game {
     
     /**
      * Generate a new random customer request based on current difficulty
+     * @param isBoss Whether this customer is a boss (for special requests)
      */
-    generateNewRequest(): Request {
-        this.currentRequest = Request.createRandom(this.difficulty);
+    generateNewRequest(isBoss: boolean = false): Request {
+        this.isBossCustomer = isBoss;
+        this.currentRequest = Request.createRandom(this.difficulty, isBoss);
         return this.currentRequest;
     }
     
@@ -77,6 +81,10 @@ export default class Game {
      * Get the current customer request
      */
     getCurrentRequest(): Request {
+        // Ensure we always have a valid request
+        if (!this.currentRequest) {
+            this.generateNewRequest(this.isBossCustomer);
+        }
         return this.currentRequest;
     }
     
@@ -154,7 +162,33 @@ export default class Game {
      * Increase difficulty
      */
     increaseDifficulty(): void {
-        this.difficulty = Math.min(3, this.difficulty + 1);
+        this.difficulty = Math.min(4, this.difficulty + 1);
+    }
+    
+    /**
+     * Set the difficulty level
+     * @param level The new difficulty level (1-4)
+     */
+    setDifficulty(level: number): void {
+        this.difficulty = Math.min(4, Math.max(1, level));
+    }
+
+    /**
+     * Check if current customer is a boss
+     */
+    isCurrentCustomerBoss(): boolean {
+        return this.isBossCustomer;
+    }
+    
+    /**
+     * Set current customer as boss or regular
+     */
+    setCurrentCustomerAsBoss(isBoss: boolean): void {
+        this.isBossCustomer = isBoss;
+        // Regenerate request with boss status if needed
+        if (this.isBossCustomer !== isBoss) {
+            this.generateNewRequest(isBoss);
+        }
     }
     
     /**

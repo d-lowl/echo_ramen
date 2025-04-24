@@ -32,16 +32,16 @@ export default class IngredientCard extends Phaser.GameObjects.Container {
         this.initialY = y;
         
         // Create glow effect
-        this.glow = scene.add.rectangle(0, 0, cardWidth + 10, cardHeight + 10, 0xffffff, 0.2)
+        this.glow = scene.add.rectangle(0, 0, cardWidth + 10, cardHeight + 10, 0xff00ff, 0.2)
             .setVisible(false)
             .setBlendMode(Phaser.BlendModes.ADD);
             
         // Create card background with border
-        this.background = scene.add.rectangle(0, 0, cardWidth, cardHeight, 0xffffff, 1)
-            .setStrokeStyle(2, 0xffffff);
+        this.background = scene.add.rectangle(0, 0, cardWidth, cardHeight, 0x000000, 0.8)
+            .setStrokeStyle(2, 0xff00ff);
         
         // Create inner background with gradient effect
-        this.innerBg = scene.add.rectangle(0, 0, cardWidth - 4, cardHeight - 4, 0x222244, 1);
+        this.innerBg = scene.add.rectangle(0, 0, cardWidth - 4, cardHeight - 4, 0x222244, 0.9);
         
         // Create name with more stylish text
         this.nameText = scene.add.text(0, -cardHeight/2 + 15, ingredient.getName(), {
@@ -172,7 +172,7 @@ export default class IngredientCard extends Phaser.GameObjects.Container {
         });
         
         // Reset border
-        this.background.setStrokeStyle(2, 0xffffff);
+        this.background.setStrokeStyle(2, 0xff00ff);
     }
     
     private onPointerDown(): void {

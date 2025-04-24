@@ -2,11 +2,16 @@ import Attribute from "./Attribute";
 import Recipe from "./Recipe";
 
 class Request {
+    private isBoss: boolean = false;
+
     /**
      * Create a new customer request
      * @param attributes The requested attribute values (Richness, Spiciness, Sweetness)
+     * @param isBoss Whether this is a boss customer request
      */
-    constructor(public attributes: { [key: string]: Attribute }) {}
+    constructor(public attributes: { [key: string]: Attribute }, isBoss: boolean = false) {
+        this.isBoss = isBoss;
+    }
 
     /**
      * Set a specific attribute value in the request
@@ -21,22 +26,31 @@ class Request {
 
     /**
      * Create a new random request with random attribute values
-     * @param difficulty Level 1-3 determining how many attributes are set
+     * @param difficulty Level 1-4 determining how many attributes are set and their complexity
+     * @param isBoss Whether this is a boss customer (more challenging requests)
      * @returns A new request with random attributes based on difficulty
      */
-    static createRandom(difficulty: number = 1): Request {
-        // Get random attribute names to set based on difficulty
+    static createRandom(difficulty: number = 1, isBoss: boolean = false): Request {
+        // Get attribute names to set based on difficulty
         const attributeNames = ["Richness", "Spiciness", "Sweetness"];
-        const shuffled = attributeNames.sort(() => 0.5 - Math.random());
-        const toSet = shuffled.slice(0, Math.min(difficulty, 3));
+        let toSet: string[] = [];
+        
+        if (isBoss) {
+            // Boss customers always request all attributes
+            toSet = [...attributeNames];
+        } else {
+            // Regular customers request attributes based on difficulty
+            const shuffled = attributeNames.sort(() => 0.5 - Math.random());
+            toSet = shuffled.slice(0, Math.min(difficulty, 3));
+        }
 
         // Set random values for selected attributes
-        const attributes = {}
+        const attributes = {};
         toSet.forEach(attr => {
             attributes[attr] = new Attribute(attr, Math.floor(Math.random() * 21) - 10, -10, 10);
         });
         
-        return new Request(attributes);
+        return new Request(attributes, isBoss);
     }
 
     static create(richness: number, spiciness: number, sweetness: number): Request {
@@ -82,6 +96,12 @@ class Request {
         };
     }
 
+    /**
+     * Check if this is a boss customer request
+     */
+    isBossRequest(): boolean {
+        return this.isBoss;
+    }
     
     /**
      * Get a description of the request using display names
@@ -104,7 +124,12 @@ class Request {
             descriptions.push(`${intensity} ${attr.getDisplayName()}`);
         });
         
-        return descriptions.join(", ");
+        // Add special indication for boss requests
+        if (this.isBoss) {
+            return "BOSS REQUEST: " + descriptions.join(",\n");
+        }
+        
+        return descriptions.join(",\n");
     }
 }
 
