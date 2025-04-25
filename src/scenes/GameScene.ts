@@ -59,10 +59,26 @@ export default class GameScene extends Phaser.Scene {
                               data.difficulty === 'medium' ? 2 : 1;
         
         // Create deck with all basic ingredients
-        const deck = getPrebuiltDeck("basic")
+        const deck = getPrebuiltDeck("basic");
         
-        // Initialize game logic
-        this.gameLogic = new Game(deck, difficultyLevel);
+        // Check if this is a floor transition
+        if (data.fromFloorTransition) {
+            // Coming from floor transition - try to get the existing game instance from registry
+            const progressionManager = this.game.registry.get('progressionManager') as ProgressionManager;
+            if (progressionManager) {
+                // Preserve the existing Game instance to maintain score
+                this.gameLogic = progressionManager.getGameInstance();
+                
+                // Update difficulty but preserve the score
+                this.gameLogic.setDifficulty(difficultyLevel);
+            } else {
+                // Fallback - create new game logic
+                this.gameLogic = new Game(deck, difficultyLevel);
+            }
+        } else {
+            // Fresh start - create new game logic
+            this.gameLogic = new Game(deck, difficultyLevel);
+        }
         
         // If not coming from floor transition, we need to reset/initialize progression
         this.waitingForNextCustomer = false;
@@ -117,6 +133,14 @@ export default class GameScene extends Phaser.Scene {
                     console.error('ProgressionManager not found in registry after floor transition');
                     // Create a new one as fallback
                     this.progressionManager = new ProgressionManager(this, this.gameLogic);
+                } else {
+                    // Make sure the progression manager has a reference to our game logic
+                    // This is needed to preserve the score between floors
+                    if (this.gameLogic !== this.progressionManager.getGameInstance()) {
+                        // We have a new game logic instance, update the progression manager
+                        this.progressionManager = new ProgressionManager(this, this.gameLogic);
+                        this.game.registry.set('progressionManager', this.progressionManager);
+                    }
                 }
             } else {
                 // Starting fresh, create a new progression manager
@@ -360,7 +384,10 @@ export default class GameScene extends Phaser.Scene {
      * Update the score display
      */
     private updateScore(): void {
-        this.scoreText.setText(`SCORE: ${this.gameLogic.getScore()}`);
+        // Update score display
+        if (this.scoreText) {
+            this.scoreText.setText(`SCORE: ${this.gameLogic.getScore()}`);
+        }
         
         // Add glitch effect to score when it updates
         this.addGlitchEffect(this.scoreText);

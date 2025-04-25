@@ -134,4 +134,11 @@ export default class ProgressionManager extends EventEmitter {
     this.currentCustomer = 1;
     this.gameInstance.setDifficulty(this.getDifficultyForFloor(1));
   }
+
+  /**
+   * Get the game instance
+   */
+  public getGameInstance(): Game {
+    return this.gameInstance;
+  }
 } 
