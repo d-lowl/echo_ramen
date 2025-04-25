@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import Button from '../components/Button';
-import { FloorData } from '../managers/ProgressionManager';
+import ProgressionManager, { FloorData } from '../managers/ProgressionManager';
 
 export default class FloorTransitionScene extends Phaser.Scene {
     private floorData: FloorData;
@@ -10,8 +10,25 @@ export default class FloorTransitionScene extends Phaser.Scene {
         super({ key: 'FloorTransitionScene' });
     }
     
-    init(data: { floorData: FloorData }): void {
-        this.floorData = data.floorData;
+    init(): void {
+        // Get progression manager from registry
+        const progressionManager = this.game.registry.get('progressionManager') as ProgressionManager;
+        
+        if (!progressionManager) {
+            console.error('ProgressionManager not found in registry');
+            // We need to have a fallback to avoid crashing
+            this.floorData = {
+                floorNumber: 1,
+                difficulty: 1,
+                isBossFloor: false,
+                totalCustomers: 2,
+                currentCustomer: 1
+            };
+        } else {
+            // Get latest floor data from progression manager
+            this.floorData = progressionManager.getCurrentFloorData();
+        }
+        
         this.transitionComplete = false;
     }
     
@@ -98,17 +115,17 @@ export default class FloorTransitionScene extends Phaser.Scene {
                     this.transitionComplete = true;
                     this.cameras.main.fadeOut(500, 0, 0, 0, (camera, progress) => {
                         if (progress === 1) {
-                            // Deep clone the floor data to avoid reference issues
-                            const floorDataClone = {
-                                ...this.floorData,
-                                // Make sure currentCustomer is 1 for the new floor
-                                currentCustomer: 1
-                            };
-                            
-                            this.scene.start('GameScene', { 
-                                floorData: floorDataClone,
-                                fromFloorTransition: true
-                            });
+                            // Get the latest floor data from ProgressionManager instead of cloning
+                            // and manually modifying the data we received
+                            const progressionManager = this.game.registry.get('progressionManager');
+                            if (progressionManager) {
+                                // Start GameScene with fresh data from ProgressionManager
+                                this.scene.start('GameScene', { 
+                                    fromFloorTransition: true
+                                });
+                            } else {
+                                console.error('ProgressionManager not found in registry');
+                            }
                         }
                     });
                 }

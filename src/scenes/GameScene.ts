@@ -64,21 +64,8 @@ export default class GameScene extends Phaser.Scene {
         // Initialize game logic
         this.gameLogic = new Game(deck, difficultyLevel);
         
-        // Initialize progression manager if not coming from floor transition
-        if (!data.fromFloorTransition) {
-            this.waitingForNextCustomer = false;
-        } else {
-            // Coming from floor transition - use the floor data
-            this.waitingForNextCustomer = false;
-            if (data.floorData) {
-                this.gameLogic.setDifficulty(data.floorData.difficulty);
-                
-                // Make sure to regenerate the request with the new difficulty
-                const isBossFloor = data.floorData.isBossFloor;
-                const isBossCustomer = isBossFloor && data.floorData.currentCustomer === (isBossFloor ? 2 : 0);
-                this.gameLogic.generateNewRequest(isBossCustomer);
-            }
-        }
+        // If not coming from floor transition, we need to reset/initialize progression
+        this.waitingForNextCustomer = false;
         
         // Clear existing UI elements to prevent stale references
         this.requestText = null;
@@ -121,15 +108,46 @@ export default class GameScene extends Phaser.Scene {
         // Initialize audio
         this.audioManager.create();
         
-        // Create progression manager
-        this.progressionManager = new ProgressionManager(this, this.gameLogic);
+        // Create progression manager if it doesn't exist or get it from registry if it does
+        if (!this.progressionManager) {
+            if (data.fromFloorTransition) {
+                // Coming from floor transition, get the existing progression manager
+                this.progressionManager = this.game.registry.get('progressionManager');
+                if (!this.progressionManager) {
+                    console.error('ProgressionManager not found in registry after floor transition');
+                    // Create a new one as fallback
+                    this.progressionManager = new ProgressionManager(this, this.gameLogic);
+                }
+            } else {
+                // Starting fresh, create a new progression manager
+                this.progressionManager = new ProgressionManager(this, this.gameLogic);
+            }
+            
+            // Store in registry for other scenes to access
+            this.game.registry.set('progressionManager', this.progressionManager);
+        }
+        
+        // Get current floor data
+        const floorData = this.progressionManager.getCurrentFloorData();
+        
+        // Set game difficulty based on current floor
+        this.gameLogic.setDifficulty(floorData.difficulty);
+        
+        // Generate appropriate customer request
+        const isBossCustomer = this.progressionManager.isCurrentCustomerBoss();
+        this.gameLogic.generateNewRequest(isBossCustomer);
+        
+        // Start background music
+        if (floorData.floorNumber === 1) {
+            this.audioManager.playMusic(2000);
+        }
         
         // Create progression UI
         this.progressionUI = new ProgressionUI(
             this,
             this.cameras.main.width - 150,
             60,
-            this.progressionManager.getCurrentFloorData()
+            floorData
         );
         
         // Setup progression event listeners
@@ -312,12 +330,11 @@ export default class GameScene extends Phaser.Scene {
         
         // Handle floor completion
         this.progressionManager.on(ProgressionEvent.FLOOR_COMPLETE, (data: any) => {
-            // Transition to floor completion scene
+            // Just fade out - no need to switch music since we're using one track
             this.cameras.main.fadeOut(500, 0, 0, 0, (camera, progress) => {
                 if (progress === 1) {
-                    this.scene.start('FloorTransitionScene', {
-                        floorData: this.progressionManager.getCurrentFloorData()
-                    });
+                    // Don't need to pass floor data since FloorTransitionScene will get it from the registry
+                    this.scene.start('FloorTransitionScene');
                 }
             });
         });
@@ -357,6 +374,8 @@ export default class GameScene extends Phaser.Scene {
         const originalX = target.x;
         const originalText = target.text;
         const originalColor = target.style.color;
+        // Play glitch sound effect
+        this.audioManager.play('glitch');
         
         // First glitch - position shift
         this.tweens.add({
@@ -595,7 +614,7 @@ export default class GameScene extends Phaser.Scene {
         });
         
         // Play a sound effect
-        this.audioManager.play('card-play');
+        this.audioManager.play('add_ingredient');
         
         // Flash the recipe container
         const recipeGlow = this.add.rectangle(
