@@ -12,6 +12,18 @@ This game is participating in the following challenges:
 - **Build it with Phaser Challenge by Phaser Studio** - Built using Phaser 3 framework
 - **$NOODS Challenge by OP Games** - A noodle-themed game with vibe coding
 
+## Vibe Coding Experience
+
+I went into this jam with zero Phaser experience, so I figured why not try out this "vibe coding" approach everyone's talking about? Honestly, it was a rather fun. 
+
+Working with Cursor (AI-powered IDE), I was able to throw together a prototype way faster than I expected. The key was starting with a structured approach - writing tickets for features before jumping into implementation. This gave the AI clear directives without getting lost in the weeds.
+
+One thing I learned quickly: you have to tone down the AI's ambitions sometimes. Left unchecked, it wanted to build very complex systems for everything, when all I needed was a simple game feature. But once we found the rhythm, the development flow was surprisingly smooth.
+
+For anyone curious about trying AI assistance for game dev, I'd say go for it - just be prepared to steer the ship rather than letting the AI captain take you on unnecessary detours.
+
+Would I use it to further polish this (or some other game)? I don't know yet, but if I do, the workflow will need to be adapted (I'm not sure what exact adaptations are needed, but this workflow is a bit messy -- fine for a jam, but not for a polished game).
+
 ## Getting Started
 
 ### Prerequisites

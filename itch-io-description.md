@@ -3,7 +3,7 @@
 ## Game Description
 A cyberpunk-themed cooking game where players balance ingredients to create the perfect ramen bowl based on customer requests in a neon-lit future.
 
-In EchoRamen, you run a futuristic ramen shop in a sprawling cyberpunk metropolis. Use your high-tech fridge to select and combine ingredients strategically, balancing three key attributes (Richness vs. Lightness, Spiciness vs. Mildness, and Sweetness vs. Savoryness) to match customer preferences. Manage your ingredient inventory and master the art of balancing flavors as you serve the denizens of this neon-lit world.
+In EchoRamen, you run a futuristic ramen shop in a sprawling cyberpunk metropolis. Use your high-tech fridge to select and combine ingredients strategically, balancing three key attributes (Richness, Spiciness, and Sweetness) to match customer preferences. Manage your ingredient inventory and master the art of balancing flavors as you serve the denizens of this neon-lit world.
 
 ## How to Play
 - Select ingredients from your high-tech fridge
@@ -12,8 +12,9 @@ In EchoRamen, you run a futuristic ramen shop in a sprawling cyberpunk metropoli
 - Manage your ingredient inventory between customers
 
 ## Controls
-- Mouse to select ingredients
-- Click Complete Order to serve the ramen bowl
+- Mouse to select and place ingredients
+- Click to combine ingredients
+- Space bar to serve the ramen bowl
 
 ## Game Jam Information
 Created for the Gamedev.js Jam 2025
@@ -30,8 +31,17 @@ This game is participating in the following challenges:
   - Built using Phaser 3 framework
   
 - **$NOODS Challenge by OP Games**
-  - A noodle-themed game. This game was written largely with the use of Cursor. Vibe coding 
-  (прости господи) all the way.
+  - A noodle-themed game with vibe coding elements
+
+## Vibe Coding Experience
+
+I went into this jam with zero Phaser experience, so I figured why not try out this "vibe coding" approach everyone's talking about? Honestly, it was a blast. 
+
+Working with Cursor (AI-powered IDE), I was able to throw together a prototype way faster than I expected. The key was starting with a structured approach - writing tickets for features before jumping into implementation. This gave the AI clear directives without getting lost in the weeds.
+
+One thing I learned quickly: you have to tone down the AI's ambitions sometimes. Left unchecked, it wanted to build an entire enterprise-grade solution when all I needed was a simple game feature. But once we found our rhythm, the development flow was surprisingly smooth.
+
+For anyone curious about trying AI assistance for game dev, I'd say go for it - just be prepared to steer the ship rather than letting the AI captain take you on unnecessary detours.
 
 ## Running the Source Code
 If you download the source code from GitHub:
