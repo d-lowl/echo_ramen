@@ -25,7 +25,7 @@ export default class ProgressionManager extends EventEmitter {
   private currentFloor: number = 1;
   private currentCustomer: number = 1;
   private totalFloors: number = 4; // 3 regular floors + 1 boss floor
-  private customersPerFloor: number = 2;
+  private customersPerFloor: number = 10;
   private bossFloorCustomers: number = 2;
   private gameInstance: Game;
   private scene: Phaser.Scene;
@@ -94,8 +94,6 @@ export default class ProgressionManager extends EventEmitter {
       this.currentFloor++;
       this.currentCustomer = 1;
       
-    
-
       // Update game difficulty
       this.gameInstance.setDifficulty(this.getDifficultyForFloor(this.currentFloor));
       
