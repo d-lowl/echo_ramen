@@ -47,7 +47,11 @@ class Request {
         // Set random values for selected attributes
         const attributes = {};
         toSet.forEach(attr => {
-            attributes[attr] = new Attribute(attr, Math.floor(Math.random() * 21) - 10, -10, 10);
+            let value;
+            do {
+                value = Math.floor(Math.random() * 21) - 10;
+            } while (value === 0);
+            attributes[attr] = new Attribute(attr, value, -10, 10);
         });
         
         return new Request(attributes, isBoss);

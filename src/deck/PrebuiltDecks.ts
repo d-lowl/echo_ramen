@@ -8,6 +8,9 @@ export function getPrebuiltDeck(name: string) {
                 ...Object.values(BasicIngredients),
                 ...Object.values(BasicIngredients),
                 ...Object.values(BasicIngredients),
+                ...Object.values(BasicIngredients),
+                ...Object.values(BasicIngredients),
+                ...Object.values(BasicIngredients),
             ]);
     }
 }

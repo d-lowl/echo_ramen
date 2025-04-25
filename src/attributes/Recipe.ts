@@ -62,7 +62,8 @@ class Recipe {
      */
     compareWithRequest(customerRequest: Request): { 
         matchPercentage: number, 
-        details: { [key: string]: { diff: number, match: number } } 
+        details: { [key: string]: { diff: number, match: number } },
+        score: number,
     } {
         const details: { [key: string]: { diff: number, match: number } } = {};
         
@@ -70,20 +71,25 @@ class Recipe {
         Object.keys(customerRequest.attributes).forEach(attr => {
             const requestedValue = customerRequest.attributes[attr].value;
             const currentValue = this.attributes[attr]?.value || 0;
-            const maxDiff = 10 + Math.abs(requestedValue);
-            const diff = Math.abs(requestedValue - currentValue);
+            // const maxDiff = 10 + Math.abs(requestedValue);
+            const maxDiff = 12;
+            // Store actual difference (positive means recipe value is higher than requested)
+            const actualDiff = currentValue - requestedValue;
+            const absDiff = Math.abs(actualDiff);
             
             details[attr] = {
-                diff: diff,
-                match: 100 - (diff / maxDiff) * 100
+                diff: actualDiff, // Store directional difference (positive or negative)
+                match: 100 - (absDiff / maxDiff) * 100
             };
         });
         
         // Calculate overall match percentage
         const matchPercentage = Object.values(details).reduce((sum, detail) => sum + detail.match, 0) / Object.keys(details).length;
-        
+        const score = Math.exp((matchPercentage/100 - 1)*4)*100
+
         return {
             matchPercentage: Math.max(0, Math.round(matchPercentage)),
+            score: Math.max(0, Math.round(score)),
             details: details
         };
     }

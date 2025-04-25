@@ -123,7 +123,8 @@ export default class Game {
      */
     evaluateRecipe(): { 
         matchPercentage: number, 
-        details: { [key: string]: { diff: number, match: number } } 
+        details: { [key: string]: { diff: number, match: number } },
+        score: number,
     } {
         return this.currentRecipe.compareWithRequest(this.currentRequest);
     }
@@ -134,7 +135,12 @@ export default class Game {
      */
     completeOrder(): { scoreEarned: number, matchPercentage: number, details: { [key: string]: { diff: number, match: number } } } {
         const result = this.evaluateRecipe();
-        const scoreEarned = Math.ceil(result.matchPercentage);
+        console.log({
+            currentRequest: this.currentRequest,
+            currentRecipe: this.currentRecipe,
+            result
+        })
+        const scoreEarned = Math.ceil(result.score);
         this.addScore(scoreEarned);
         
         // Store the result for returning

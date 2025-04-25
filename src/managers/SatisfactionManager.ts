@@ -39,8 +39,13 @@ export default class SatisfactionManager {
             'disgusted': "This is terrible! Nothing like what I wanted!"
         };
         
+        // For good satisfaction levels (ecstatic or satisfied), don't add specific complaints
+        if (level === 'ecstatic' || level === 'satisfied') {
+            return genericMessages[level];
+        }
+        
         // If we have a worst attribute, add specific feedback
-        if (worstAttribute && level !== 'ecstatic') {
+        if (worstAttribute) {
             const attributeMessages = {
                 'richness': {
                     high: "It's too rich for my taste.",
@@ -57,6 +62,8 @@ export default class SatisfactionManager {
             };
             
             const attrData = details[worstAttribute];
+            // If diff > 0, recipe value is higher than requested (too much)
+            // If diff < 0, recipe value is lower than requested (too little)
             const direction = attrData.diff > 0 ? 'high' : 'low';
             
             return `${genericMessages[level]} ${attributeMessages[worstAttribute.toLowerCase()][direction]}`;
