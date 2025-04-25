@@ -1,6 +1,16 @@
-# Ramen Balance Master
+# EchoRamen
 
 A cyberpunk-themed cooking game where players balance ingredients to create the perfect ramen bowl based on customer requests in a neon-lit future.
+
+Created for the [Gamedev.js Jam 2025](https://itch.io/jam/gamedevjs-2025) on the theme of "Balance".
+
+## Challenges
+
+This game is participating in the following challenges:
+
+- **Open Source Challenge by GitHub** - Full source code available in this repository
+- **Build it with Phaser Challenge by Phaser Studio** - Built using Phaser 3 framework
+- **$NOODS Challenge by OP Games** - A noodle-themed game with vibe coding
 
 ## Getting Started
 
@@ -10,6 +20,10 @@ A cyberpunk-themed cooking game where players balance ingredients to create the 
 
 ### Installation
 ```bash
+# Clone the repository
+git clone https://github.com/d-lowl/echo_ramen.git
+cd echo_ramen
+
 # Install dependencies
 npm install
 ```
@@ -51,3 +65,11 @@ The project uses TypeScript to provide better type safety and development experi
 - Configure TypeScript settings in `tsconfig.json`
 - Use interfaces to define the shape of your game objects and data
 - Run `npm run typecheck` to check for type errors without building 
+
+## Credits
+- D. Lowl -- Developer
+- DavidKBD -- Music (Pink Bloom Synthwave Music Pack, CC-BY 4.0)
+- raylibtech -- Sound Effects (rfxgen)
+
+## License
+MIT License 

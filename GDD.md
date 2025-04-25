@@ -1,4 +1,4 @@
-# Ramen Balance Master - Game Design Document
+# EchoRamen - Game Design Document
 
 ## Game Overview
 
