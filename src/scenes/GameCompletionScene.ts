@@ -47,7 +47,7 @@ export default class GameCompletionScene extends Phaser.Scene {
         this.add.text(
             this.cameras.main.centerX,
             230,
-            'You have defeated all bosses!',
+            'Thanks for playing our game jam demo!',
             {
                 fontFamily: 'Arial',
                 fontSize: '32px',

@@ -88,10 +88,11 @@ export default class FloorTransitionScene extends Phaser.Scene {
         
         // Special text for boss floor
         if (this.floorData.isBossFloor) {
+            // Update boss text to show placeholder message
             const bossText = this.add.text(
                 this.cameras.main.centerX,
                 this.cameras.main.centerY + 100,
-                'DEFEAT THE BOSSES TO COMPLETE THE GAME',
+                'DEMO VERSION: BOSS FLOOR NOT IMPLEMENTED',
                 {
                     fontFamily: 'Arial',
                     fontSize: '24px',
@@ -102,6 +103,20 @@ export default class FloorTransitionScene extends Phaser.Scene {
             ).setOrigin(0.5);
             
             this.addGlowEffect(bossText, 0xff5555);
+            
+            // Add additional text explaining this is not the full game
+            const demoText = this.add.text(
+                this.cameras.main.centerX,
+                this.cameras.main.centerY + 140,
+                'Thanks for playing our game jam demo!',
+                {
+                    fontFamily: 'Arial',
+                    fontSize: '20px',
+                    color: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                }
+            ).setOrigin(0.5);
         }
         
         // Continue button
@@ -115,14 +130,33 @@ export default class FloorTransitionScene extends Phaser.Scene {
                     this.transitionComplete = true;
                     this.cameras.main.fadeOut(500, 0, 0, 0, (camera, progress) => {
                         if (progress === 1) {
-                            // Get the latest floor data from ProgressionManager instead of cloning
-                            // and manually modifying the data we received
-                            const progressionManager = this.game.registry.get('progressionManager');
+                            // Get the latest floor data from ProgressionManager
+                            const progressionManager = this.game.registry.get('progressionManager') as ProgressionManager;
                             if (progressionManager) {
-                                // Start GameScene with fresh data from ProgressionManager
-                                this.scene.start('GameScene', { 
-                                    fromFloorTransition: true
-                                });
+                                if (this.floorData.isBossFloor) {
+                                    // Get the previous GameScene
+                                    const gameScene = this.scene.get('GameScene');
+                                    
+                                    // Extract score and totalCustomers from GameScene
+                                    let score = 0;
+                                    let totalCustomers = 0;
+                                    
+                                    if (gameScene && (gameScene as any).gameLogic) {
+                                        score = (gameScene as any).gameLogic.getScore();
+                                        totalCustomers = (gameScene as any).totalCustomersServed || 0;
+                                    }
+                                    
+                                    // Go directly to GameCompletionScene for the boss floor
+                                    this.scene.start('GameCompletionScene', {
+                                        score: score,
+                                        totalCustomers: totalCustomers
+                                    });
+                                } else {
+                                    // Start GameScene with fresh data from ProgressionManager
+                                    this.scene.start('GameScene', { 
+                                        fromFloorTransition: true
+                                    });
+                                }
                             } else {
                                 console.error('ProgressionManager not found in registry');
                             }
